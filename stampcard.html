@@ -87,6 +87,25 @@
             white-space: nowrap;
         }
 
+        /* ストックスタンプ用 削除ボタン */
+.stock-delete-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    border: none;
+    background-color: rgba(0,0,0,0.5);
+    color: #fff;
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 20;
+}
+
+
         /* 交換済みスロットのスタイル */
         .exchanged-slot-content {
             position: absolute;
@@ -248,16 +267,21 @@
                 <div id="default-stamp-3" class="p-2 bg-green-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-green-200 transition">
                     <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path></svg>
                 </div>
+                
                 <!-- ストックされたピクチャースタンプ -->
-                <div id="stocked-stamp-0" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-                    <span class="text-gray-400 text-lg"></span>
-                </div>
-                <div id="stocked-stamp-1" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-                    <span class="text-gray-400 text-lg"></span>
-                </div>
-                <div id="stocked-stamp-2" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-                    <span class="text-gray-400 text-lg"></span>
-                </div>
+<div id="stocked-stamp-0" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+    <!-- 削除ボタン（画像があるときだけ効く） -->
+    <button class="stock-delete-btn hidden" type="button">×</button>
+    <span class="text-gray-400 text-lg"></span>
+</div>
+<div id="stocked-stamp-1" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+    <button class="stock-delete-btn hidden" type="button">×</button>
+    <span class="text-gray-400 text-lg"></span>
+</div>
+<div id="stocked-stamp-2" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+    <button class="stock-delete-btn hidden" type="button">×</button>
+    <span class="text-gray-400 text-lg"></span>
+</div>
             </div>
             <label for="image-upload" class="w-full text-center block bg-orange-400 text-white font-bold py-3 px-4 rounded-lg cursor-pointer hover:bg-orange-500 transition">
                 しゃしんからえらぶ
@@ -599,27 +623,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // スタンプ選択モーダルのストックスタンプを更新
-    function updateStockedStampsInModal() {
-        const state = getCurrentState();
-        if (!state) return;
-        for (let i = 0; i < 3; i++) {
-            const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
-            stockedStampDiv.innerHTML = ''; 
-            if (state.stockedStamps[i]) {
-                // モーダル内では位置指定が邪魔になるので、簡易クラスにしてもOKだが
-                // ここではそのまま stamp-image を利用
-                stockedStampDiv.innerHTML = `<img src="${state.stockedStamps[i]}" class="stamp-image" alt="ストックスタンプ">`;
-                stockedStampDiv.classList.remove('bg-gray-100');
-                stockedStampDiv.classList.add('border-2', 'border-gray-300');
-                stockedStampDiv.onclick = () => applyStamp(state.stockedStamps[i]);
-            } else {
-                stockedStampDiv.innerHTML = `<span class="text-gray-400 text-lg">+</span>`;
-                stockedStampDiv.classList.add('bg-gray-100');
-                stockedStampDiv.classList.remove('border-2', 'border-gray-300');
-                stockedStampDiv.onclick = null;
-            }
+function updateStockedStampsInModal() {
+    const state = getCurrentState();
+    if (!state) return;
+
+    for (let i = 0; i < 3; i++) {
+        const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
+        const deleteBtn = stockedStampDiv.querySelector('.stock-delete-btn');
+
+        // いったん中身をリセット（×ボタンだけ残す）
+        stockedStampDiv.querySelectorAll('img, span').forEach(el => el.remove());
+
+        if (state.stockedStamps[i]) {
+            // 画像スタンプがあるとき
+            const imgEl = document.createElement('img');
+            imgEl.src = state.stockedStamps[i];
+            imgEl.alt = 'ストックスタンプ';
+            imgEl.className = 'stamp-image';
+
+            stockedStampDiv.appendChild(imgEl);
+            stockedStampDiv.classList.remove('bg-gray-100');
+            stockedStampDiv.classList.add('border-2', 'border-gray-300');
+
+            // クリックでスタンプとして使う
+            stockedStampDiv.onclick = (e) => {
+                // ×を押したときはスタンプ処理を走らせない
+                if (e.target.classList.contains('stock-delete-btn')) return;
+                applyStamp(state.stockedStamps[i]);
+            };
+
+            // 削除ボタンを表示
+            deleteBtn.classList.remove('hidden');
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation(); // 親のクリック（スタンプ押し）を無効化
+                // i番目のストックスタンプを削除
+                state.stockedStamps.splice(i, 1);
+                saveAppData();
+                updateStockedStampsInModal();
+            };
+
+        } else {
+            // 空のスロット（＋表示）
+            const plusSpan = document.createElement('span');
+            plusSpan.className = 'text-gray-400 text-lg';
+            plusSpan.textContent = '+';
+            stockedStampDiv.appendChild(plusSpan);
+
+            stockedStampDiv.classList.add('bg-gray-100');
+            stockedStampDiv.classList.remove('border-2', 'border-gray-300');
+
+            // 画像がないときは削除ボタンを隠す
+            deleteBtn.classList.add('hidden');
+            deleteBtn.onclick = null;
+
+            // 空スロットクリック時は何もしない
+            stockedStampDiv.onclick = null;
         }
     }
+}
 
     // --- イベントリスナー ---
     
@@ -956,23 +1017,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('default-stamp-3').addEventListener('click', () => applyStamp(createStampSVG('thumb')));
     
         // 画像アップロードのリスナー
-        document.getElementById('image-upload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const state = getCurrentState();
-            if (file && state) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const imageUrl = event.target.result;
-                    if (state.stockedStamps.length >= 3) {
-                        state.stockedStamps.shift(); 
-                    }
-                    state.stockedStamps.push(imageUrl);
-                    applyStamp(imageUrl);
-                };
-                reader.readAsDataURL(file);
+       document.getElementById('image-upload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const state = getCurrentState();
+    if (file && state) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const imageUrl = event.target.result;
+            // ストックスタンプに追加
+            if (state.stockedStamps.length >= 3) {
+                state.stockedStamps.shift(); 
             }
-            e.target.value = '';
-        });
+            state.stockedStamps.push(imageUrl);
+            saveAppData();                     // ★ 追加：ストック状態を保存
+            applyStamp(imageUrl);
+        };
+        reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+});
+
 
         // お祝い画面を閉じるリスナー
         document.getElementById('close-celebration').addEventListener('click', () => {
