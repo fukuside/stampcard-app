@@ -333,8 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUserIndex: null,
         users: []
     };
-    let deleteIndex = null; // 削除対象のインデックスを保持
-    let isExchangeMode = false; // 交換モードの状態
+    let deleteIndex = null;      // 削除対象のインデックス（ユーザー or スタンプのマス番号）
+    let deleteMode = null;       // 'user' or 'stamp' を入れる
+    let isExchangeMode = false;  // 交換モードの状態
+
     
     // 現在のユーザーの状態を取得するヘルパー関数
     const getCurrentState = () => {
@@ -721,19 +723,21 @@ function updateStockedStampsInModal() {
         });
 
         document.querySelectorAll('.delete-user-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const index = parseInt(e.currentTarget.dataset.index, 10);
-                deleteIndex = index;
-                const userToDelete = appData.users[index];
-                const name = userToDelete.name || `カード ${index + 1}`;
-                
-                const deleteModal = document.getElementById('delete-confirm-modal');
-                const deleteTitle = document.getElementById('delete-confirm-title');
-                deleteTitle.textContent = `「${name}」を削除しますか？`;
-                deleteModal.classList.add('is-visible');
-            });
-        });
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(e.currentTarget.dataset.index, 10);
+        deleteIndex = index;
+        deleteMode = 'user';  // ★ 追加：ユーザー削除モード
+        const userToDelete = appData.users[index];
+        const name = userToDelete.name || `カード ${index + 1}`;
+        
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        const deleteTitle = document.getElementById('delete-confirm-title');
+        deleteTitle.textContent = `「${name}」を削除しますか？`;
+        deleteModal.classList.add('is-visible');
+    });
+});
+
     }
 
     function addSetupListeners() {
@@ -775,63 +779,111 @@ function updateStockedStampsInModal() {
             renderCard();
             saveAppData();
         });
-        document.getElementById('back-to-home-btn').addEventListener('click', renderHomeScreen);
-        document.getElementById('delete-card-btn').addEventListener('click', () => {
-            deleteIndex = appData.currentUserIndex;
-            const currentName = state.name || `カード ${deleteIndex + 1}`;
 
-            const deleteModal = document.getElementById('delete-confirm-modal');
-            const deleteTitle = document.getElementById('delete-confirm-title');
-            deleteTitle.textContent = `「${currentName}」を削除しますか？`;
-            deleteModal.classList.add('is-visible');
-        });
+        document.getElementById('delete-card-btn').addEventListener('click', () => {
+    deleteIndex = appData.currentUserIndex;
+    deleteMode = 'user'; // ★ 追加：ユーザー/カード削除モード
+    const currentName = state.name || `カード ${deleteIndex + 1}`;
+
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const deleteTitle = document.getElementById('delete-confirm-title');
+    deleteTitle.textContent = `「${currentName}」を削除しますか？`;
+    deleteModal.classList.add('is-visible');
+});
     }
     
-    function addCardListeners() {
-        const state = getCurrentState();
-        if(!state) return;
+   function addCardListeners() {
+    const state = getCurrentState();
+    if (!state) return;
+    
+    // ▼ 既存：クリックしてスタンプを押す処理
+    app.querySelector('.stamp-card').addEventListener('click', (e) => {
+        const target = e.target.closest('.stamp-slot');
+        if (!target) return;
         
-        // スタンプマスのクリック処理
-        app.querySelector('.stamp-card').addEventListener('click', (e) => {
-            const target = e.target.closest('.stamp-slot');
-            if (!target) return;
-            
-            const targetIndex = parseInt(target.dataset.index, 10);
-            const isStamped = state.stamps.some(s => s.index === targetIndex);
-            const isExchanged = state.exchanges.some(e => e.index === targetIndex);
+        const targetIndex = parseInt(target.dataset.index, 10);
+        const isStamped = state.stamps.some(s => s.index === targetIndex);
+        const isExchanged = state.exchanges.some(e => e.index === targetIndex);
 
-            if (isExchangeMode) {
-                if (isExchanged) return; 
-                applyExchange(targetIndex);
-            } else {
-                if (isStamped || isExchanged) return; 
-                state.stampingIndex = targetIndex;
-                updateStockedStampsInModal();
-                stampModal.classList.add('is-visible');
-            }
-        });
-        
-        const backToHomeBtn = document.getElementById('back-to-home-btn');
-        if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
-        
-        const goToSetupBtn = document.getElementById('go-to-setup-btn');
-        if (goToSetupBtn) goToSetupBtn.addEventListener('click', renderSetup);
-
-        const actionBtn = document.getElementById('action-btn');
-        if (actionBtn) actionBtn.addEventListener('click', handleCardCompletion);
-
-        const exchangeBtn = document.getElementById('exchange-btn');
-        if (exchangeBtn) {
-            exchangeBtn.addEventListener('click', () => {
-                isExchangeMode = !isExchangeMode;
-                exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
-                exchangeBtn.classList.toggle('bg-purple-500');
-                exchangeBtn.classList.toggle('hover:bg-purple-600');
-                exchangeBtn.classList.toggle('bg-red-500');
-                exchangeBtn.classList.toggle('hover:bg-red-600');
-            });
+        if (isExchangeMode) {
+            if (isExchanged) return; 
+            applyExchange(targetIndex);
+        } else {
+            if (isStamped || isExchanged) return; 
+            state.stampingIndex = targetIndex;
+            updateStockedStampsInModal();
+            stampModal.classList.add('is-visible');
         }
+    });
+
+    // ▼ 既存：ボタン類のリスナー
+    const backToHomeBtn = document.getElementById('back-to-home-btn');
+    if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
+        
+    const goToSetupBtn = document.getElementById('go-to-setup-btn');
+    if (goToSetupBtn) goToSetupBtn.addEventListener('click', renderSetup);
+
+    const actionBtn = document.getElementById('action-btn');
+    if (actionBtn) actionBtn.addEventListener('click', handleCardCompletion);
+
+    const exchangeBtn = document.getElementById('exchange-btn');
+    if (exchangeBtn) {
+        exchangeBtn.addEventListener('click', () => {
+            isExchangeMode = !isExchangeMode;
+            exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
+            exchangeBtn.classList.toggle('bg-purple-500');
+            exchangeBtn.classList.toggle('hover:bg-purple-600');
+            exchangeBtn.classList.toggle('bg-red-500');
+            exchangeBtn.classList.toggle('hover:bg-red-600');
+        });
     }
+
+    // ★ ここから追加：スタンプ長押しで削除
+    const slots = app.querySelectorAll('.stamp-slot');
+
+    slots.forEach(slot => {
+        let pressTimer = null;
+
+        const startPress = (event) => {
+            const idx = parseInt(slot.dataset.index, 10);
+            const isStamped = state.stamps.some(s => s.index === idx);
+            const isExchanged = state.exchanges.some(e => e.index === idx);
+
+            // スタンプが押されているマスだけ長押し削除を有効にする
+            if (!isStamped || isExchanged) return;
+
+            // 600ms 長押しで発火
+            pressTimer = setTimeout(() => {
+                deleteIndex = idx;
+                deleteMode = 'stamp';
+
+                const deleteModal = document.getElementById('delete-confirm-modal');
+                const deleteTitle = document.getElementById('delete-confirm-title');
+                deleteTitle.textContent = `${idx + 1}ばんのスタンプを消しますか？`;
+                deleteModal.classList.add('is-visible');
+            }, 600);
+        };
+
+        const cancelPress = () => {
+            if (pressTimer !== null) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        };
+
+        // PC用
+        slot.addEventListener('mousedown', startPress);
+        slot.addEventListener('mouseup', cancelPress);
+        slot.addEventListener('mouseleave', cancelPress);
+
+        // スマホ・タブレット用
+        slot.addEventListener('touchstart', startPress);
+        slot.addEventListener('touchend', cancelPress);
+        slot.addEventListener('touchcancel', cancelPress);
+    });
+    // ★ 追加ここまで
+}
+
 
     // ポイント交換を適用する処理
     function applyExchange(targetIndex) {
@@ -989,21 +1041,37 @@ function updateStockedStampsInModal() {
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.remove('is-visible');
-            deleteIndex = null;
-        });
+       cancelDeleteBtn.addEventListener('click', () => {
+    deleteModal.classList.remove('is-visible');
+    deleteIndex = null;
+    deleteMode = null; // ★ 追加
+});
 
         confirmDeleteBtn.addEventListener('click', () => {
-            if (deleteIndex !== null) {
-                appData.users.splice(deleteIndex, 1);
-                appData.currentUserIndex = null;
-                saveAppData();
-                renderHomeScreen();
-                deleteModal.classList.remove('is-visible');
-                deleteIndex = null;
-            }
-        });
+    if (deleteIndex === null) return;
+
+    if (deleteMode === 'user') {
+        // ユーザー（カード）削除
+        appData.users.splice(deleteIndex, 1);
+        appData.currentUserIndex = null;
+        saveAppData();
+        renderHomeScreen();
+    } else if (deleteMode === 'stamp') {
+        // スタンプ削除
+        const state = getCurrentState();
+        if (state) {
+            // 対象マスのスタンプだけ消す
+            state.stamps = state.stamps.filter(s => s.index !== deleteIndex);
+            saveAppData();
+            renderCard();
+        }
+    }
+
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    deleteModal.classList.remove('is-visible');
+    deleteIndex = null;
+    deleteMode = null;
+});
 
         // スタンプ選択モーダルのリスナー
         document.getElementById('cancel-stamp').addEventListener('click', () => {
