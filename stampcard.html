@@ -336,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let deleteIndex = null;      // 削除対象のインデックス（ユーザー or スタンプのマス番号）
     let deleteMode = null;       // 'user' or 'stamp' を入れる
     let isExchangeMode = false;  // 交換モードの状態
-
+    // ★ 追加：修正前の状態をとっておく場所
+    let editBackup = null;
     
     // 現在のユーザーの状態を取得するヘルパー関数
     const getCurrentState = () => {
@@ -417,88 +418,188 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 描画関数 ---
 
     // ユーザー選択画面の描画
-    function renderHomeScreen() {
-        isExchangeMode = false; // 画面切り替え時にリセット
-        appData.currentUserIndex = null;
-        let userButtons = appData.users.map((user, index) => {
-            const name = user.name || `カード ${index + 1}`;
-            // 交換もスタンプの一部としてカウント
-            const filledSlots = user.stamps.length + user.exchanges.length;
-            const isComplete = filledSlots === user.stampCount && user.stampCount > 0;
-            const progress = isComplete ? 'かんせい！' : `${filledSlots}/${user.stampCount}`;
-            return `
-                <div class="flex items-center mb-3">
-                    <button data-index="${index}" class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
-                        <span class="text-lg font-bold text-gray-700">${name}</span>
-                        <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">${progress}</span>
-                    </button>
-                    <button data-index="${index}" class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
-                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                    </button>
-                </div>
-            `;
-        }).join('');
+function renderHomeScreen() {
+    // 交換モードは必ずOFFにしておく
+    isExchangeMode = false;
+    // どのカードも選んでいない状態にする
+    appData.currentUserIndex = null;
 
-        let newCardButton = '';
-        if (appData.users.length < 5) {
-            newCardButton = `<button id="add-new-card-btn" class="w-full p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg mt-4">あたらしいカードをつくる</button>`;
-        }
+    const users = appData.users || [];
 
-        app.innerHTML = `
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                <h1 class="text-2xl font-bold text-center mb-4 text-yellow-600">どのカードをつかいますか？</h1>
-                <div class="user-list mt-4">${userButtons}</div>
-                ${newCardButton}
+    // 各カードの行（ボタン）を作成
+    const userButtons = users.map((user, index) => {
+        const name = user.name || `カード ${index + 1}`;
+
+        // 交換もスタンプの一部としてカウント
+        const filledSlots = (user.stamps?.length || 0) + (user.exchanges?.length || 0);
+        const total = user.stampCount || 0;
+        const isComplete = total > 0 && filledSlots === total;
+        const progressLabel = total > 0 ? `${filledSlots}/${total}` : '0/10';
+
+        return `
+            <div class="flex items-center mb-3">
+                <button
+                    data-index="${index}"
+                    class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-700">${name}</span>
+                    <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">
+                        ${isComplete ? 'かんせい！' : progressLabel}
+                    </span>
+                </button>
+                <button
+                    data-index="${index}"
+                    class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
+                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                </button>
             </div>
         `;
-        addHomeScreenListeners();
-    }
+    }).join('');
+
+    // 「あたらしいカードをつくる」ボタン（最大5枚まで）
+    const newCardButton = users.length < 5
+        ? `
+        <button
+            id="add-new-card-btn"
+            class="w-full mt-4 p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
+            あたらしいカードをつくる
+        </button>
+        `
+        : '';
+
+    app.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-4 text-yellow-600">
+                どのカードをつかいますか？
+            </h1>
+            <div class="user-list mt-4">
+                ${userButtons || ''}
+            </div>
+            ${newCardButton}
+        </div>
+    `;
+
+    addHomeScreenListeners();
+}
     
-    // 設定画面の描画
-    function renderSetup() {
-        isExchangeMode = false; // 画面切り替え時にリセット
-        const state = getCurrentState();
-        if (!state) return renderHomeScreen();
-        
-        state.rewards = state.rewards.filter(r => r < state.stampCount);
-        const lastIndex = state.stampCount - 1;
-        if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+ // 設定画面の描画
+function renderSetup() {
+    isExchangeMode = false;
+    const state = getCurrentState();
+    if (!state) return renderHomeScreen();
 
-        app.innerHTML = `
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                 <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">がんばりカードをつくろう</h1>
-                <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
-                <div class="mb-4">
-                    <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
-                    <input type="text" id="name-input" value="${state.name}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="（れい）たろう">
-                </div>
-                <div class="mb-4">
-                    <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
-                    <input type="text" id="goal-input" value="${state.goal || ''}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="（れい）朝７時までにおきます">
-                </div>
-                <div class="mb-6">
-                    <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
-                    <div id="background-selector" class="flex gap-3 justify-center"></div>
-                </div>
-                <div class="mb-6">
-                    <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span></label>
-                    <input type="range" id="stamp-count-slider" min="5" max="30" value="${state.stampCount}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div class="mb-6">
-                     <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
-                     <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
-                </div>
-                <button id="create-card-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">カードをつくる！</button>
-                 <div class="mt-6 flex justify-between">
-                    <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">ユーザーきりかえ</button>
-                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">このカードをけす</button>
-                </div>
-            </div>
-        `;
-        renderRewardSelector();
-        renderBackgroundSelector();
-        addSetupListeners();
+    // isSetup === true…まだカードを作っている途中（新規）
+    // isSetup === false…すでにカード画面がある（＝修正モード）
+    const isEditMode = !state.isSetup;
+
+    // ★ 修正モードに入った瞬間の状態をバックアップ
+    if (isEditMode) {
+        editBackup = JSON.parse(JSON.stringify(state));
+    } else {
+        editBackup = null;
     }
+
+    // ごほうび位置を整理
+    state.rewards = state.rewards.filter(r => r < state.stampCount);
+    const lastIndex = state.stampCount - 1;
+    if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+
+    const minStampCount = isEditMode ? state.stampCount : 5;
+    const primaryBtnLabel = isEditMode ? 'カードを修正する' : 'カードをつくる！';
+    const titleText = isEditMode ? 'がんばりカードを修正しよう' : 'がんばりカードをつくろう';
+
+    app.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">${titleText}</h1>
+            <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
+
+            <div class="mb-4">
+                <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
+                <input
+                    type="text"
+                    id="name-input"
+                    value="${state.name}"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    placeholder="（れい）たろう">
+            </div>
+
+            <div class="mb-4">
+                <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
+                <input
+                    type="text"
+                    id="goal-input"
+                    value="${state.goal || ''}"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    placeholder="（れい）朝７時までにおきます">
+            </div>
+
+            <div class="mb-6">
+                <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
+                <div id="background-selector" class="flex gap-3 justify-center"></div>
+            </div>
+
+            <div class="mb-6">
+                <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">
+                    スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span>
+                </label>
+                <input
+                    type="range"
+                    id="stamp-count-slider"
+                    min="${minStampCount}"
+                    max="30"
+                    value="${state.stampCount}"
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                ${
+                    isEditMode
+                        ? '<p class="mt-1 text-xs text-gray-500">※ いまより少なくすることはできません</p>'
+                        : ''
+                }
+            </div>
+
+            <div class="mb-6">
+                <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
+                <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
+            </div>
+
+            <button
+                id="create-card-btn"
+                class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
+                ${primaryBtnLabel}
+            </button>
+
+            ${
+                isEditMode
+                    ? `
+                <div class="mt-6 flex justify-between">
+                    <button id="back-to-card-btn" class="text-sm text-gray-600 hover:underline">
+                        修正をしないでもどる
+                    </button>
+                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                        このカードをけす
+                    </button>
+                </div>
+                `
+                    : `
+                <div class="mt-6 flex justify-between">
+                    <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">
+                        ユーザーきりかえ
+                    </button>
+                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                        このカードをけす
+                    </button>
+                </div>
+                `
+            }
+        </div>
+    `;
+
+    renderRewardSelector();
+    renderBackgroundSelector();
+    addSetupListeners();
+}
 
     // 背景色選択の描画
     function renderBackgroundSelector() {
@@ -614,7 +715,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button id="exchange-btn" class="w-full max-w-xs text-sm ${exchangeBtnClass} text-white font-bold py-3 px-5 rounded-full ${exchangeBtnHover} transition">${exchangeBtnText}</button>
                     <div class="flex justify-center gap-4">
                         <button id="back-to-home-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition">ユーザーきりかえ</button>
-                        <button id="go-to-setup-btn" class="bg-yellow-200 text-yellow-800 font-bold py-2 px-5 rounded-full hover:bg-yellow-300 transition">設定</button>
+                        <button id="go-to-setup-btn" class="bg-yellow-200 text-yellow-800 font-bold py-2 px-5 rounded-full hover:bg-yellow-300 transition">
+  今のカードを修正
+</button>
                     </div>
                 </div>
             `;
@@ -686,111 +789,173 @@ function updateStockedStampsInModal() {
 
     // --- イベントリスナー ---
     
-    function addHomeScreenListeners() {
-        const addNewCardBtn = document.getElementById('add-new-card-btn');
-        if (addNewCardBtn) {
-            addNewCardBtn.addEventListener('click', () => {
-                const newUserState = {
-                    name: '',
-                    goal: '',
-                    stampCount: 10,
-                    rewards: [],
-                    stamps: [],
-                    exchanges: [],
-                    isSetup: true,
-                    stampingIndex: null,
-                    stockedStamps: [],
-                    cardBackground: '#fff9e6'
-                };
-                appData.users.push(newUserState);
-                appData.currentUserIndex = appData.users.length - 1;
-                saveAppData();
-                renderSetup();
-            });
-        }
-        
-        document.querySelectorAll('.user-select-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = parseInt(e.currentTarget.dataset.index, 10);
-                appData.currentUserIndex = index;
-                const state = getCurrentState();
-                if(state.isSetup || !state.name){
-                    renderSetup();
-                } else {
-                    renderCard();
-                }
-            });
+   function addHomeScreenListeners() {
+    const addNewCardBtn = document.getElementById('add-new-card-btn');
+
+    // 「あたらしいカードをつくる」
+    if (addNewCardBtn) {
+        addNewCardBtn.addEventListener('click', () => {
+            const newUserState = {
+                name: '',
+                goal: '',
+                stampCount: 10,
+                rewards: [],
+                stamps: [],
+                exchanges: [],
+                isSetup: true,      // ★ 新しいカードは「設定画面から」スタート
+                stampingIndex: null,
+                stockedStamps: [],
+                cardBackground: '#fff9e6'
+            };
+            appData.users.push(newUserState);
+            appData.currentUserIndex = appData.users.length - 1;
+            saveAppData();
+            renderSetup();
         });
-
-        document.querySelectorAll('.delete-user-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = parseInt(e.currentTarget.dataset.index, 10);
-        deleteIndex = index;
-        deleteMode = 'user';  // ★ 追加：ユーザー削除モード
-        const userToDelete = appData.users[index];
-        const name = userToDelete.name || `カード ${index + 1}`;
-        
-        const deleteModal = document.getElementById('delete-confirm-modal');
-        const deleteTitle = document.getElementById('delete-confirm-title');
-        deleteTitle.textContent = `「${name}」を削除しますか？`;
-        deleteModal.classList.add('is-visible');
-    });
-});
-
     }
 
-    function addSetupListeners() {
-        const state = getCurrentState();
-        if (!state) return;
-        
-        document.getElementById('name-input').addEventListener('input', (e) => state.name = e.target.value);
-        document.getElementById('goal-input').addEventListener('input', (e) => state.goal = e.target.value);
-        document.getElementById('stamp-count-slider').addEventListener('input', (e) => {
-            state.stampCount = parseInt(e.target.value, 10);
-            document.getElementById('stamp-count-label').textContent = state.stampCount;
-            state.rewards = state.rewards.filter(r => r < state.stampCount);
-            const lastIndex = state.stampCount - 1;
-            if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
-            renderRewardSelector();
-        });
-        document.getElementById('reward-selector').addEventListener('click', (e) => {
-            const target = e.target.closest('div[data-index]');
-            if (target) {
-                const index = parseInt(target.dataset.index, 10);
-                if (index === state.stampCount - 1) return;
-                if (state.rewards.includes(index)) state.rewards = state.rewards.filter(r => r !== index);
-                else state.rewards.push(index);
-                renderRewardSelector();
+    // 既存カードを選択
+    document.querySelectorAll('.user-select-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.dataset.index, 10);
+            appData.currentUserIndex = index;
+
+            const state = getCurrentState();
+            if (!state) {
+                renderHomeScreen();
+                return;
+            }
+
+            // 名前がまだなら設定画面から
+            if (state.isSetup || !state.name) {
+                renderSetup();
+            } else {
+                renderCard();
             }
         });
-        document.getElementById('background-selector').addEventListener('click', (e) => {
-            const target = e.target.closest('div[data-bg]');
-            if (target) {
-                state.cardBackground = target.dataset.bg;
-                renderBackgroundSelector(); // 選択状態を再描画
-            }
+    });
+
+    // カード削除（ユーザー削除）
+    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = parseInt(e.currentTarget.dataset.index, 10);
+            deleteIndex = index;
+            deleteMode = 'user';
+
+            const userToDelete = appData.users[index];
+            const name = userToDelete.name || `カード ${index + 1}`;
+
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const deleteTitle = document.getElementById('delete-confirm-title');
+            deleteTitle.textContent = `「${name}」を削除しますか？`;
+            deleteModal.classList.add('is-visible');
         });
-        document.getElementById('create-card-btn').addEventListener('click', () => {
-            if (!state.name) { alert('なまえをいれてね！'); return; }
-            state.isSetup = false;
+    });
+}
+
+   function addSetupListeners() {
+    const state = getCurrentState();
+    if (!state) return;
+
+    const isEditMode = !state.isSetup;
+
+    // 入力値の反映
+    document.getElementById('name-input').addEventListener('input', (e) => {
+        state.name = e.target.value;
+    });
+
+    document.getElementById('goal-input').addEventListener('input', (e) => {
+        state.goal = e.target.value;
+    });
+
+    document.getElementById('stamp-count-slider').addEventListener('input', (e) => {
+        const newCount = parseInt(e.target.value, 10);
+        state.stampCount = newCount;
+        document.getElementById('stamp-count-label').textContent = state.stampCount;
+
+        state.rewards = state.rewards.filter(r => r < state.stampCount);
+        const lastIndex = state.stampCount - 1;
+        if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+        renderRewardSelector();
+    });
+
+    document.getElementById('reward-selector').addEventListener('click', (e) => {
+        const target = e.target.closest('div[data-index]');
+        if (!target) return;
+
+        const index = parseInt(target.dataset.index, 10);
+        if (index === state.stampCount - 1) return; // 最後のマスは固定でごほうび
+
+        if (state.rewards.includes(index)) {
+            state.rewards = state.rewards.filter(r => r !== index);
+        } else {
+            state.rewards.push(index);
+        }
+        renderRewardSelector();
+    });
+
+    document.getElementById('background-selector').addEventListener('click', (e) => {
+        const target = e.target.closest('div[data-bg]');
+        if (!target) return;
+        state.cardBackground = target.dataset.bg;
+        renderBackgroundSelector();
+    });
+
+    // 「カードをつくる！」 or 「カードを修正する」
+    document.getElementById('create-card-btn').addEventListener('click', () => {
+        if (!state.name) {
+            alert('なまえをいれてね！');
+            return;
+        }
+
+        // 新規作成のときだけスタンプ履歴リセット
+        if (!isEditMode) {
             state.stamps = [];
             state.exchanges = [];
-            renderCard();
-            saveAppData();
-        });
+        }
 
-        document.getElementById('delete-card-btn').addEventListener('click', () => {
-    deleteIndex = appData.currentUserIndex;
-    deleteMode = 'user'; // ★ 追加：ユーザー/カード削除モード
-    const currentName = state.name || `カード ${deleteIndex + 1}`;
+        state.isSetup = false;
+        saveAppData();
+        renderCard();
+    });
 
-    const deleteModal = document.getElementById('delete-confirm-modal');
-    const deleteTitle = document.getElementById('delete-confirm-title');
-    deleteTitle.textContent = `「${currentName}」を削除しますか？`;
-    deleteModal.classList.add('is-visible');
-});
+    // 戻る系ボタン
+    if (isEditMode) {
+        // 「修正をしないでもどる」：バックアップで元に戻す
+        const backToCardBtn = document.getElementById('back-to-card-btn');
+        if (backToCardBtn) {
+            backToCardBtn.addEventListener('click', () => {
+                if (editBackup) {
+                    appData.users[appData.currentUserIndex] = editBackup;
+                }
+                saveAppData();
+                renderCard();
+            });
+        }
+    } else {
+        // 新規作成モードでは「ユーザーきりかえ」
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        if (backToHomeBtn) {
+            backToHomeBtn.addEventListener('click', renderHomeScreen);
+        }
     }
+
+    // カード削除ボタン（共通）
+    const deleteBtn = document.getElementById('delete-card-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            deleteIndex = appData.currentUserIndex;
+            deleteMode = 'user';
+            const currentName = state.name || `カード ${deleteIndex + 1}`;
+
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const deleteTitle = document.getElementById('delete-confirm-title');
+            deleteTitle.textContent = `「${currentName}」を削除しますか？`;
+            deleteModal.classList.add('is-visible');
+        });
+    }
+}
     
    function addCardListeners() {
     const state = getCurrentState();
