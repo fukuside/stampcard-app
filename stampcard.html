@@ -245,21 +245,34 @@
 </head>
 <body class="bg-amber-50">
 
-    <div id="app" class="p-4 max-w-lg mx-auto">
-        <!-- アプリのコンテンツがここに描画されます -->
+  <div class="p-4 max-w-lg mx-auto">
+    <!-- ▼ ほめほめスタンプ ロゴ -->
+    <div class="flex justify-center mb-4">
+      <img
+        src="homesta-logo.png"
+        alt="ほめほめスタンプ ロゴ"
+        class="w-64 max-w-full h-auto"
+      >
     </div>
 
-    <!-- 右下の社名＋ロゴ -->
-<div class="fixed bottom-4 right-4 flex items-center gap-2 text-xs md:text-sm bg-white/80 rounded-full shadow px-3 py-1">
-  <img
-    src="fukushi-logo.png"
-    alt="一般社団法人福祉でつながる会 ロゴ"
-    class="w-6 h-6 rounded-full object-contain"
-  >
-  <span class="text-gray-600 font-semibold">
-    一般社団法人福祉でつながる会
-  </span>
-</div>
+    <!-- ▼ ここにスタンプカード画面が描画される -->
+    <div id="app">
+      <!-- アプリのコンテンツがここに描画されます -->
+    </div>
+  </div>
+
+  <!-- 右下の社名＋ロゴ -->
+  <div class="fixed bottom-4 right-4 flex items-center gap-2 text-xs md:text-sm bg-white/80 rounded-full shadow px-3 py-1">
+    <img
+      src="fukushi-logo.png"
+      alt="一般社団法人福祉でつながる会 ロゴ"
+      class="w-6 h-6 rounded-full object-contain"
+    >
+    <span class="text-gray-600 font-semibold">
+      一般社団法人福祉でつながる会
+    </span>
+  </div>
+</body>
 
 
     <!-- スタンプ選択モーダル -->
