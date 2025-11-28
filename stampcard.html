@@ -6,16 +6,16 @@
     <!-- ★ タイトルもアプリ名に合わせておくとベター -->
     <title>ほめほめスタンプ（ほめスタ）</title>
 
-    <!-- ★ PWA manifest の読み込み -->
-    <link rel="manifest" href="/manifest.webmanifest">
+    <!-- PWA manifest 読み込み（GitHub Pages用） -->
+    <link rel="manifest" href="manifest.webmanifest">
 
-    <!-- ★ ブラウザタブ用のアイコン（任意） -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192.png">
+    <!-- iPhone用アイコン -->
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    <!-- ★ iPhone / iPad のホーム画面アイコン -->
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <!-- favicon（任意） -->
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
 
-    <!-- ★ テーマカラー（アドレスバー色など） -->
+    <!-- テーマカラー（アドレスバー色など） -->
     <meta name="theme-color" content="#FFF4C7">
 
     <!-- Google tag (gtag.js) -->
@@ -274,18 +274,135 @@
     </div>
   </div>
 
-  <!-- 右下の社名＋ロゴ -->
-  <div class="fixed bottom-4 right-4 flex items-center gap-2 text-xs md:text-sm bg-white/80 rounded-full shadow px-3 py-1">
-    <img
-      src="fukushi-logo.png"
-      alt="一般社団法人福祉でつながる会 ロゴ"
-      class="w-8 h-8 rounded-full object-contain"
-    >
-    <span class="text-gray-600 font-semibold">
-      一般社団法人福祉でつながる会
-    </span>
+    <!-- ===== フッター右下のロゴ ===== -->
+  <div id="logo-container"
+    class="fixed bottom-20 right-4 flex items-center space-x-2 opacity-75">
+    <img src="fukushi-logo.png" alt="ロゴ" class="h-10 w-10 rounded-full object-cover">
+    <p class="text-xs text-gray-600 font-semibold">一般社団法人福祉でつながる会</p>
   </div>
+
+  <!-- ===== 問い合わせボタン ===== -->
+  <button id="contactButton"
+    class="fixed bottom-4 right-4 bg-yellow-200 border border-gray-300
+         shadow-md px-4 py-2 rounded-lg text-sm z-50">
+    問い合わせはこちら
+  </button>
+
+  <!-- フィードバックフォーム（初期は非表示） -->
+  <div id="feedbackForm"
+  class="fixed bottom-32 right-4 bg-white border border-gray-300 rounded-lg shadow-xl
+         p-4 w-72 z-50 hidden">
+
+    <h3 class="text-lg mb-3 font-bold">お問い合わせ</h3>
+
+    <form id="feedbackSubmitForm">
+      <!-- どのアプリか -->
+      <label class="text-sm">アプリを選択（必須）</label>
+      <select id="appName" required
+        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+        <option value="" disabled selected>選択してください</option>
+        <option value="あとなんかい？アプリ">あとなんかい？アプリ</option>
+        <option value="リフレミー">リフレミー</option>
+        <option value="ほめスタ">ほめスタ</option>
+        <option value="めざせリフレーミングマスター">めざせリフレーミングマスター</option>
+      </select>
+
+      <!-- 種別 -->
+      <label class="text-sm">種別</label>
+      <select id="feedbackType"
+        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+        <option>バグ報告</option>
+        <option>要望</option>
+        <option>質問</option>
+        <option>その他</option>
+      </select>
+
+      <!-- 内容 -->
+      <label class="text-sm">内容</label>
+      <textarea id="content"
+        class="w-full border rounded px-2 py-1 mb-3 text-sm h-20"
+        required></textarea>
+
+      <!-- メール（任意） -->
+      <label class="text-sm">メールアドレス（任意）</label>
+      <input id="email" type="email"
+        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+
+      <!-- 送信 -->
+      <button type="submit"
+        class="w-full bg-orange-300 py-2 rounded-lg text-sm font-bold mb-2">
+        送信
+      </button>
+
+      <button type="button" id="closeFeedback"
+        class="w-full bg-gray-200 py-2 rounded-lg text-sm">
+        閉じる
+      </button>
+    </form>
+
+    <!-- 送信後メッセージ -->
+    <div id="feedbackThanks" class="hidden text-center">
+      <p class="mb-4">送信ありがとうございます！</p>
+      <button type="button" id="closeThanks"
+        class="w-full bg-gray-200 py-2 rounded-lg text-sm">
+        閉じる
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== スクリプト群 ===== -->
+  <!-- 問い合わせフォーム用 -->
+  <script>
+    const contactButton = document.getElementById("contactButton");
+    const feedbackForm = document.getElementById("feedbackForm");
+    const closeFeedback = document.getElementById("closeFeedback");
+    const feedbackSubmitForm = document.getElementById("feedbackSubmitForm");
+    const feedbackThanks = document.getElementById("feedbackThanks");
+    const closeThanks = document.getElementById("closeThanks");
+
+    contactButton.addEventListener("click", () => {
+      feedbackForm.classList.remove("hidden");
+    });
+
+    closeFeedback.addEventListener("click", () => {
+      feedbackForm.classList.add("hidden");
+    });
+
+    feedbackSubmitForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const appName = document.getElementById("appName").value;
+      const feedbackType = document.getElementById("feedbackType").value;
+      const content = document.getElementById("content").value;
+      const email = document.getElementById("email").value;
+
+      if (!appName) {
+        alert("アプリを選択してください。");
+        return;
+      }
+
+      const subject = encodeURIComponent(`[${appName}] 問い合わせ: ${feedbackType}`);
+      const body = encodeURIComponent(
+        `アプリ：${appName}\n種別：${feedbackType}\n\n内容：\n${content}\n\nメール：${email || "未記入"}`
+      );
+
+      window.location.href =
+        `mailto:info.fukushi@allcare.co.jp?subject=${subject}&body=${body}`;
+
+      feedbackSubmitForm.classList.add("hidden");
+      feedbackThanks.classList.remove("hidden");
+    });
+
+    closeThanks.addEventListener("click", () => {
+      feedbackForm.classList.add("hidden");
+      feedbackSubmitForm.classList.remove("hidden");
+      feedbackThanks.classList.add("hidden");
+      feedbackSubmitForm.reset();
+    });
+  </script>
+
 </body>
+</html>
 
 
     <!-- スタンプ選択モーダル -->
