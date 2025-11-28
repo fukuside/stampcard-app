@@ -264,7 +264,7 @@
       <img
         src="homesta-logo.png"
         alt="ほめほめスタンプ ロゴ"
-        class="w-50 max-w-full h-auto"
+        class="w-30 max-w-full h-auto"
       >
     </div>
 
@@ -350,61 +350,6 @@
     </div>
   </div>
 
-  <!-- ===== スクリプト群 ===== -->
-  <!-- 問い合わせフォーム用 -->
-  <script>
-    const contactButton = document.getElementById("contactButton");
-    const feedbackForm = document.getElementById("feedbackForm");
-    const closeFeedback = document.getElementById("closeFeedback");
-    const feedbackSubmitForm = document.getElementById("feedbackSubmitForm");
-    const feedbackThanks = document.getElementById("feedbackThanks");
-    const closeThanks = document.getElementById("closeThanks");
-
-    contactButton.addEventListener("click", () => {
-      feedbackForm.classList.remove("hidden");
-    });
-
-    closeFeedback.addEventListener("click", () => {
-      feedbackForm.classList.add("hidden");
-    });
-
-    feedbackSubmitForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const appName = document.getElementById("appName").value;
-      const feedbackType = document.getElementById("feedbackType").value;
-      const content = document.getElementById("content").value;
-      const email = document.getElementById("email").value;
-
-      if (!appName) {
-        alert("アプリを選択してください。");
-        return;
-      }
-
-      const subject = encodeURIComponent(`[${appName}] 問い合わせ: ${feedbackType}`);
-      const body = encodeURIComponent(
-        `アプリ：${appName}\n種別：${feedbackType}\n\n内容：\n${content}\n\nメール：${email || "未記入"}`
-      );
-
-      window.location.href =
-        `mailto:info.fukushi@allcare.co.jp?subject=${subject}&body=${body}`;
-
-      feedbackSubmitForm.classList.add("hidden");
-      feedbackThanks.classList.remove("hidden");
-    });
-
-    closeThanks.addEventListener("click", () => {
-      feedbackForm.classList.add("hidden");
-      feedbackSubmitForm.classList.remove("hidden");
-      feedbackThanks.classList.add("hidden");
-      feedbackSubmitForm.reset();
-    });
-  </script>
-
-</body>
-</html>
-
-
     <!-- スタンプ選択モーダル -->
     <div id="stamp-modal" class="modal-backdrop">
         <div class="modal-content">
@@ -471,6 +416,58 @@
         </div>
     </div>
 
+    
+  <!-- ===== スクリプト群 ===== -->
+  <!-- 問い合わせフォーム用 -->
+  <script>
+    const contactButton = document.getElementById("contactButton");
+    const feedbackForm = document.getElementById("feedbackForm");
+    const closeFeedback = document.getElementById("closeFeedback");
+    const feedbackSubmitForm = document.getElementById("feedbackSubmitForm");
+    const feedbackThanks = document.getElementById("feedbackThanks");
+    const closeThanks = document.getElementById("closeThanks");
+
+    contactButton.addEventListener("click", () => {
+      feedbackForm.classList.remove("hidden");
+    });
+
+    closeFeedback.addEventListener("click", () => {
+      feedbackForm.classList.add("hidden");
+    });
+
+    feedbackSubmitForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const appName = document.getElementById("appName").value;
+      const feedbackType = document.getElementById("feedbackType").value;
+      const content = document.getElementById("content").value;
+      const email = document.getElementById("email").value;
+
+      if (!appName) {
+        alert("アプリを選択してください。");
+        return;
+      }
+
+      const subject = encodeURIComponent(`[${appName}] 問い合わせ: ${feedbackType}`);
+      const body = encodeURIComponent(
+        `アプリ：${appName}\n種別:${feedbackType}\n\n内容:\n${content}\n\nメール:${email || "未記入"}`
+      );
+
+      window.location.href =
+        `mailto:info.fukushi@allcare.co.jp?subject=${subject}&body=${body}`;
+
+      feedbackSubmitForm.classList.add("hidden");
+      feedbackThanks.classList.remove("hidden");
+    });
+
+    closeThanks.addEventListener("click", () => {
+      feedbackForm.classList.add("hidden");
+      feedbackSubmitForm.classList.remove("hidden");
+      feedbackThanks.classList.add("hidden");
+      feedbackSubmitForm.reset();
+    });
+  </script>
+    <!-- アプリ本体のスクリプト -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
