@@ -263,9 +263,9 @@
     <div class="flex justify-center mb-4">
       <img
         src="homesta-logo.png"
-        alt="ほめほめスタンプ ロゴ"
-        class="w-30 max-w-full h-auto"
-      >
+        alt="ほめスタ ロゴ"
+        class="w-40 md:w-56 max-w-full h-auto mx-auto"
+       >
     </div>
 
     <!-- ▼ ここにスタンプカード画面が描画される -->
@@ -274,19 +274,26 @@
     </div>
   </div>
 
-    <!-- ===== フッター右下のロゴ ===== -->
-  <div id="logo-container"
-    class="fixed bottom-20 right-4 flex items-center space-x-2 opacity-75">
-    <img src="fukushi-logo.png" alt="ロゴ" class="h-10 w-10 rounded-full object-cover">
-    <p class="text-xs text-gray-600 font-semibold">一般社団法人福祉でつながる会</p>
-  </div>
+  <!-- ===== フッター（スマホ最適化） ===== -->
+<div class="w-full mt-10 pb-6 flex flex-col items-center gap-3">
 
-  <!-- ===== 問い合わせボタン ===== -->
+  <!-- 問い合わせボタン -->
   <button id="contactButton"
-    class="fixed bottom-4 right-4 bg-yellow-200 border border-gray-300
-         shadow-md px-4 py-2 rounded-lg text-sm z-50">
+    class="bg-yellow-200 border border-gray-300 shadow-md
+           px-4 py-2 rounded-lg text-sm z-50 w-48 text-center">
     問い合わせはこちら
   </button>
+
+  <!-- 社名ロゴ -->
+  <div class="flex items-center gap-2 opacity-80">
+    <img src="fukushi-logo.png"
+         alt="一般社団法人福祉でつながる会 ロゴ"
+         class="w-8 h-8 rounded-full object-cover">
+    <p class="text-xs text-gray-600 font-semibold">
+      一般社団法人福祉でつながる会
+    </p>
+  </div>
+</div>
 
   <!-- フィードバックフォーム（初期は非表示） -->
   <div id="feedbackForm"
