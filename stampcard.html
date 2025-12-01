@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ★ タイトルもアプリ名に合わせておくとベター -->
     <title>ほめほめスタンプ（ほめスタ）</title>
 
     <!-- PWA manifest 読み込み（GitHub Pages用） -->
@@ -19,42 +18,42 @@
     <meta name="theme-color" content="#FFF4C7">
 
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FMFQS52W93"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  
-  gtag('config', 'G-FMFQS52W93');
-</script>
-    <!-- Tailwind CSSを読み込み -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FMFQS52W93"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FMFQS52W93');
+    </script>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- canvas-confettiを読み込み -->
+    <!-- canvas-confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-    <!-- html2canvasを読み込み -->
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-        /* 全体のフォント設定 */
         body {
             font-family: 'Inter', 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'BIZ UDPGothic', Meiryo, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* カスタムスタイル */
         .stamp-card {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            padding: 16px;
-            /* background-color はJSで動的に設定 */
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    padding: 16px;
+    border-radius: 16px;          /* 角の丸みだけ残す（不要なら消してOK） */
+    background-color: transparent; /* 背景色なしにする */
+    box-shadow: none;             /* ← 影を消すポイント */
+}
+
 
         .stamp-slot {
             position: relative;
             width: 100%;
-            padding-bottom: 100%; /* 正方形を維持 */
+            padding-bottom: 100%;
             border-radius: 50%;
             background-color: #ffffff;
             border: 3px dashed #fbd38d;
@@ -63,7 +62,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* 画像がはみ出さないように */
+            overflow: hidden;
         }
         .stamp-slot:hover {
             transform: scale(1.05);
@@ -82,7 +81,7 @@
             font-size: 2rem;
             color: #f6ad55;
             z-index: 5;
-            pointer-events: none; /* クリックイベントを妨げないように */
+            pointer-events: none;
         }
 
         .stamp-image {
@@ -102,7 +101,7 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 0.65rem;
-            color: #6a4d0f; /* 濃いめの茶色 */
+            color: #6a4d0f;
             background-color: rgba(255, 255, 255, 0.7);
             padding: 2px 5px;
             border-radius: 8px;
@@ -110,26 +109,23 @@
             white-space: nowrap;
         }
 
-        /* ストックスタンプ用 削除ボタン */
-.stock-delete-btn {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 20px;
-    height: 20px;
-    border-radius: 9999px;
-    border: none;
-    background-color: rgba(0,0,0,0.5);
-    color: #fff;
-    font-size: 14px;
-    line-height: 18px;
-    text-align: center;
-    cursor: pointer;
-    z-index: 20;
-}
+        .stock-delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            border: none;
+            background-color: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 14px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 20;
+        }
 
-
-        /* 交換済みスロットのスタイル */
         .exchanged-slot-content {
             position: absolute;
             top: 0;
@@ -142,19 +138,18 @@
             align-items: center;
             z-index: 10;
             border-radius: 50%;
-            background-color: #e5e7eb; /* グレーの背景 */
+            background-color: #e5e7eb;
         }
         .exchanged-icon {
-            font-size: 1.5rem; /* 24px */
-            color: #16a34a; /* 濃い緑 */
+            font-size: 1.5rem;
+            color: #16a34a;
         }
         .exchanged-date {
-            font-size: 0.75rem; /* 12px */
-            color: #4b5563; /* 濃いグレー */
+            font-size: 0.75rem;
+            color: #4b5563;
             font-weight: 600;
         }
 
-        /* モーダルのスタイル */
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -187,7 +182,6 @@
              transform: scale(1);
         }
         
-        /* 達成時のお祝い画面用 */
         #celebration-screen {
             position: fixed;
             top: 0;
@@ -215,10 +209,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* キャンバス上のクリックを無効化 */
+            pointer-events: none;
         }
 
-        /* スタンプアニメーション用 */
         .stamp-overlay {
             position: fixed;
             top: 0;
@@ -228,8 +221,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 60; /* モーダルより手前 */
-            pointer-events: none; /* クリックを通過させる */
+            z-index: 60;
+            pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s ease-out;
         }
@@ -238,20 +231,20 @@
         }
         .animated-stamp {
             position: absolute;
-            width: 80px; /* アニメーション中のスタンプサイズ */
+            width: 80px;
             height: 80px;
             object-fit: cover;
             border-radius: 50%;
-            transform: scale(2); /* 初期は大きめ */
+            transform: scale(2);
             opacity: 0;
             transition: transform 0.3s ease-out, opacity 0.3s ease-out;
         }
         .animated-stamp.animate-in {
-            transform: scale(1) translateY(-20px); /* 軽く浮き上がるように */
+            transform: scale(1) translateY(-20px);
             opacity: 1;
         }
         .animated-stamp.animate-out {
-            transform: scale(0.5); /* 小さく消える */
+            transform: scale(0.5);
             opacity: 0;
         }
     </style>
@@ -259,51 +252,48 @@
 <body class="bg-amber-50">
 
   <div class="p-4 max-w-lg mx-auto">
-    <!-- ▼ ほめほめスタンプ ロゴ -->
+    <!-- ロゴ -->
     <div class="flex justify-center mb-4">
       <img
         src="homesta-logo.png"
         alt="ほめスタ ロゴ"
         class="w-40 md:w-56 max-w-full h-auto mx-auto"
-       >
+      >
     </div>
 
-    <!-- ▼ ここにスタンプカード画面が描画される -->
-    <div id="app">
-      <!-- アプリのコンテンツがここに描画されます -->
+    <!-- アプリ本体 -->
+    <div id="app"></div>
+  </div>
+
+  <!-- フッター（右寄せ） -->
+  <div class="w-full mt-10 pb-6 flex flex-col items-end gap-3 pr-4">
+
+    <!-- 問い合わせボタン -->
+    <button id="contactButton"
+      class="bg-yellow-200 border border-gray-300 shadow-md
+             px-4 py-2 rounded-lg text-sm z-50 w-48 text-center">
+      問い合わせはこちら
+    </button>
+
+    <!-- 社名ロゴ -->
+    <div class="flex items-center gap-2 opacity-80">
+      <img src="fukushi-logo.png"
+           alt="一般社団法人福祉でつながる会 ロゴ"
+           class="w-8 h-8 rounded-full object-cover">
+      <p class="text-xs text-gray-600 font-semibold">
+        一般社団法人福祉でつながる会
+      </p>
     </div>
   </div>
 
-  <!-- ===== フッター（スマホ最適化） ===== -->
-<div class="w-full mt-10 pb-6 flex flex-col items-center gap-3">
-
-  <!-- 問い合わせボタン -->
-  <button id="contactButton"
-    class="bg-yellow-200 border border-gray-300 shadow-md
-           px-4 py-2 rounded-lg text-sm z-50 w-48 text-center">
-    問い合わせはこちら
-  </button>
-
-  <!-- 社名ロゴ -->
-  <div class="flex items-center gap-2 opacity-80">
-    <img src="fukushi-logo.png"
-         alt="一般社団法人福祉でつながる会 ロゴ"
-         class="w-8 h-8 rounded-full object-cover">
-    <p class="text-xs text-gray-600 font-semibold">
-      一般社団法人福祉でつながる会
-    </p>
-  </div>
-</div>
-
-  <!-- フィードバックフォーム（初期は非表示） -->
+  <!-- フィードバックフォーム -->
   <div id="feedbackForm"
-  class="fixed bottom-32 right-4 bg-white border border-gray-300 rounded-lg shadow-xl
-         p-4 w-72 z-50 hidden">
+    class="fixed bottom-32 right-4 bg-white border border-gray-300 rounded-lg shadow-xl
+           p-4 w-72 z-50 hidden">
 
     <h3 class="text-lg mb-3 font-bold">お問い合わせ</h3>
 
     <form id="feedbackSubmitForm">
-      <!-- どのアプリか -->
       <label class="text-sm">アプリを選択（必須）</label>
       <select id="appName" required
         class="w-full border rounded px-2 py-1 mb-3 text-sm">
@@ -314,7 +304,6 @@
         <option value="めざせリフレーミングマスター">めざせリフレーミングマスター</option>
       </select>
 
-      <!-- 種別 -->
       <label class="text-sm">種別</label>
       <select id="feedbackType"
         class="w-full border rounded px-2 py-1 mb-3 text-sm">
@@ -324,18 +313,15 @@
         <option>その他</option>
       </select>
 
-      <!-- 内容 -->
       <label class="text-sm">内容</label>
       <textarea id="content"
         class="w-full border rounded px-2 py-1 mb-3 text-sm h-20"
         required></textarea>
 
-      <!-- メール（任意） -->
       <label class="text-sm">メールアドレス（任意）</label>
       <input id="email" type="email"
         class="w-full border rounded px-2 py-1 mb-3 text-sm">
 
-      <!-- 送信 -->
       <button type="submit"
         class="w-full bg-orange-300 py-2 rounded-lg text-sm font-bold mb-2">
         送信
@@ -347,7 +333,6 @@
       </button>
     </form>
 
-    <!-- 送信後メッセージ -->
     <div id="feedbackThanks" class="hidden text-center">
       <p class="mb-4">送信ありがとうございます！</p>
       <button type="button" id="closeThanks"
@@ -357,75 +342,72 @@
     </div>
   </div>
 
-    <!-- スタンプ選択モーダル -->
-    <div id="stamp-modal" class="modal-backdrop">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold text-center mb-4 text-gray-700">スタンプをえらんでね</h3>
-            <div class="grid grid-cols-3 gap-4 mb-4">
-                <!-- デフォルトスタンプ -->
-                <div id="default-stamp-1" class="p-2 bg-yellow-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-yellow-200 transition">
-                    <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                </div>
-                <div id="default-stamp-2" class="p-2 bg-blue-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-blue-200 transition">
-                    <svg class="w-10 h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
-                </div>
-                <div id="default-stamp-3" class="p-2 bg-green-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-green-200 transition">
-                    <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path></svg>
-                </div>
-                
-                <!-- ストックされたピクチャースタンプ -->
-<div id="stocked-stamp-0" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-    <!-- 削除ボタン（画像があるときだけ効く） -->
-    <button class="stock-delete-btn hidden" type="button">×</button>
-    <span class="text-gray-400 text-lg"></span>
-</div>
-<div id="stocked-stamp-1" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-    <button class="stock-delete-btn hidden" type="button">×</button>
-    <span class="text-gray-400 text-lg"></span>
-</div>
-<div id="stocked-stamp-2" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
-    <button class="stock-delete-btn hidden" type="button">×</button>
-    <span class="text-gray-400 text-lg"></span>
-</div>
-            </div>
-            <label for="image-upload" class="w-full text-center block bg-orange-400 text-white font-bold py-3 px-4 rounded-lg cursor-pointer hover:bg-orange-500 transition">
-                しゃしんからえらぶ
-            </label>
-            <input type="file" id="image-upload" class="hidden" accept="image/*">
-            <button id="cancel-stamp" class="w-full text-center mt-3 text-gray-600 py-2">キャンセル</button>
+  <!-- スタンプ選択モーダル -->
+  <div id="stamp-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold text-center mb-4 text-gray-700">スタンプをえらんでね</h3>
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <!-- デフォルトスタンプ -->
+        <div id="default-stamp-1" class="p-2 bg-yellow-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-yellow-200 transition">
+          <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
         </div>
-    </div>
-    
-    <!-- ご褒美達成お祝い画面 -->
-    <div id="celebration-screen">
-        <canvas id="celebration-canvas"></canvas>
-        <div class="text-center p-4 relative z-10">
-            <p class="text-4xl font-bold text-orange-500 mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">やったね！</p>
-            <p id="celebration-message" class="text-xl font-semibold text-gray-700"></p>
-            <button id="close-celebration" class="mt-8 bg-white text-orange-500 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-50 transition">とじる</button>
+        <div id="default-stamp-2" class="p-2 bg-blue-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-blue-200 transition">
+          <svg class="w-10 h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
-    </div>
-
-    <!-- スタンプアニメーション用オーバーレイ -->
-    <div id="stamp-overlay" class="stamp-overlay">
-        <img id="animated-stamp-image" src="" alt="スタンプ" class="animated-stamp">
-    </div>
-
-    <!-- 削除確認モーダル -->
-    <div id="delete-confirm-modal" class="modal-backdrop">
-        <div class="modal-content text-center">
-            <h3 id="delete-confirm-title" class="text-xl font-bold text-center mb-4 text-gray-700"></h3>
-            <p class="text-gray-600 mb-6">この操作は取り消せません。</p>
-            <div class="flex justify-center gap-4">
-                <button id="cancel-delete-btn" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">キャンセル</button>
-                <button id="confirm-delete-btn" class="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600">削除する</button>
-            </div>
+        <div id="default-stamp-3" class="p-2 bg-green-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-green-200 transition">
+          <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path></svg>
         </div>
+        
+        <!-- ストックされたピクチャースタンプ -->
+        <div id="stocked-stamp-0" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+          <button class="stock-delete-btn hidden" type="button">×</button>
+          <span class="text-gray-400 text-lg"></span>
+        </div>
+        <div id="stocked-stamp-1" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+          <button class="stock-delete-btn hidden" type="button">×</button>
+          <span class="text-gray-400 text-lg"></span>
+        </div>
+        <div id="stocked-stamp-2" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+          <button class="stock-delete-btn hidden" type="button">×</button>
+          <span class="text-gray-400 text-lg"></span>
+        </div>
+      </div>
+      <label for="image-upload" class="w-full text-center block bg-orange-400 text-white font-bold py-3 px-4 rounded-lg cursor-pointer hover:bg-orange-500 transition">
+        しゃしんからえらぶ
+      </label>
+      <input type="file" id="image-upload" class="hidden" accept="image/*">
+      <button id="cancel-stamp" class="w-full text-center mt-3 text-gray-600 py-2">キャンセル</button>
     </div>
+  </div>
+  
+  <!-- ご褒美達成お祝い画面 -->
+  <div id="celebration-screen">
+    <canvas id="celebration-canvas"></canvas>
+    <div class="text-center p-4 relative z-10">
+      <p class="text-4xl font-bold text-orange-500 mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">やったね！</p>
+      <p id="celebration-message" class="text-xl font-semibold text-gray-700"></p>
+      <button id="close-celebration" class="mt-8 bg-white text-orange-500 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-50 transition">とじる</button>
+    </div>
+  </div>
 
-    
-  <!-- ===== スクリプト群 ===== -->
-  <!-- 問い合わせフォーム用 -->
+  <!-- スタンプアニメーション用オーバーレイ -->
+  <div id="stamp-overlay" class="stamp-overlay">
+    <img id="animated-stamp-image" src="" alt="スタンプ" class="animated-stamp">
+  </div>
+
+  <!-- 削除確認モーダル -->
+  <div id="delete-confirm-modal" class="modal-backdrop">
+    <div class="modal-content text-center">
+      <h3 id="delete-confirm-title" class="text-xl font-bold text-center mb-4 text-gray-700"></h3>
+      <p class="text-gray-600 mb-6">この操作は取り消せません。</p>
+      <div class="flex justify-center gap-4">
+        <button id="cancel-delete-btn" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">キャンセル</button>
+        <button id="confirm-delete-btn" class="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600">削除する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- フィードバック用スクリプト -->
   <script>
     const contactButton = document.getElementById("contactButton");
     const feedbackForm = document.getElementById("feedbackForm");
@@ -474,9 +456,10 @@
       feedbackSubmitForm.reset();
     });
   </script>
-    <!-- アプリ本体のスクリプト -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+
+  <!-- アプリ本体スクリプト -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
     const stampModal = document.getElementById('stamp-modal');
     const celebrationScreen = document.getElementById('celebration-screen');
@@ -485,18 +468,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatedStampImage = document.getElementById('animated-stamp-image');
     let confettiInstance = confetti.create(celebrationCanvas, { resize: true });
 
-    // アプリ全体のデータ管理
     let appData = {
         currentUserIndex: null,
         users: []
     };
-    let deleteIndex = null;      // 削除対象のインデックス（ユーザー or スタンプのマス番号）
-    let deleteMode = null;       // 'user' or 'stamp' を入れる
-    let isExchangeMode = false;  // 交換モードの状態
-    // ★ 追加：修正前の状態をとっておく場所
+    let deleteIndex = null;
+    let deleteMode = null;   // 'user' / 'stamp'
+    let isExchangeMode = false;
     let editBackup = null;
     
-    // 現在のユーザーの状態を取得するヘルパー関数
     const getCurrentState = () => {
         if (appData.currentUserIndex === null || !appData.users[appData.currentUserIndex]) {
             return null;
@@ -504,7 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return appData.users[appData.currentUserIndex];
     };
 
-    // --- データ永続化 ---
     function saveAppData() {
         localStorage.setItem('ganbariCardAppData', JSON.stringify(appData));
     }
@@ -524,8 +503,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!Array.isArray(user.stockedStamps)) {
                     user.stockedStamps = [];
                 }
+                if (typeof user.memo === 'undefined') {
+                    user.memo = '';
+                }
+                if (typeof user.comment === 'undefined') {
+                    user.comment = '';
+                }
 
-                // ★ ここで古いスタンプデータを修正
                 if (Array.isArray(user.stamps)) {
                     user.stamps.forEach(s => {
                         if (!s || typeof s.image !== 'string') return;
@@ -533,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (trimmed.startsWith('<img')) {
                             const m = trimmed.match(/src="([^"]+)"/);
                             if (m) {
-                                s.image = m[1]; // src の中身だけを保存し直す
+                                s.image = m[1];
                             }
                         }
                     });
@@ -551,7 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 oldState.cardBackground = '#fff9e6';
                 oldState.exchanges = [];
                 oldState.stockedStamps = oldState.stockedStamps || [];
-                // 旧形式のスタンプもここで修正
+                oldState.memo = '';
+                oldState.comment = '';
                 if (Array.isArray(oldState.stamps)) {
                     oldState.stamps.forEach(s => {
                         if (!s || typeof s.image !== 'string') return;
@@ -572,193 +557,194 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 描画関数 ---
+    // ホーム画面
+    function renderHomeScreen() {
+        isExchangeMode = false;
+        appData.currentUserIndex = null;
 
-    // ユーザー選択画面の描画
-function renderHomeScreen() {
-    // 交換モードは必ずOFFにしておく
-    isExchangeMode = false;
-    // どのカードも選んでいない状態にする
-    appData.currentUserIndex = null;
+        const users = appData.users || [];
 
-    const users = appData.users || [];
+        const userButtons = users.map((user, index) => {
+            const name = user.name || `カード ${index + 1}`;
+            const filledSlots = (user.stamps?.length || 0) + (user.exchanges?.length || 0);
+            const total = user.stampCount || 0;
+            const isComplete = total > 0 && filledSlots === total;
+            const progressLabel = total > 0 ? `${filledSlots}/${total}` : '0/10';
 
-    // 各カードの行（ボタン）を作成
-    const userButtons = users.map((user, index) => {
-        const name = user.name || `カード ${index + 1}`;
+            return `
+                <div class="flex items-center mb-3">
+                    <button
+                        data-index="${index}"
+                        class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
+                        <span class="text-lg font-bold text-gray-700">${name}</span>
+                        <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">
+                            ${isComplete ? 'かんせい！' : progressLabel}
+                        </span>
+                    </button>
+                    <button
+                        data-index="${index}"
+                        class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
+                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
+                                  clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }).join('');
 
-        // 交換もスタンプの一部としてカウント
-        const filledSlots = (user.stamps?.length || 0) + (user.exchanges?.length || 0);
-        const total = user.stampCount || 0;
-        const isComplete = total > 0 && filledSlots === total;
-        const progressLabel = total > 0 ? `${filledSlots}/${total}` : '0/10';
+        const newCardButton = users.length < 5
+            ? `
+            <button
+                id="add-new-card-btn"
+                class="w-full mt-4 p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
+                あたらしいカードをつくる
+            </button>
+            `
+            : '';
 
-        return `
-            <div class="flex items-center mb-3">
-                <button
-                    data-index="${index}"
-                    class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
-                    <span class="text-lg font-bold text-gray-700">${name}</span>
-                    <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">
-                        ${isComplete ? 'かんせい！' : progressLabel}
-                    </span>
-                </button>
-                <button
-                    data-index="${index}"
-                    class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
-                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
-                              clip-rule="evenodd"></path>
-                    </svg>
-                </button>
+        app.innerHTML = `
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">
+                    どのカードをつかいますか？
+                </h1>
+                <p class="text-center text-sm text-gray-500 mb-4">
+                    カードをえらんでスタンプをためよう
+                </p>
+
+                <div class="user-list mt-2">
+                    ${userButtons || ''}
+                </div>
+
+                ${newCardButton}
+
+                <div class="mt-6 text-center">
+                  <a
+                    href="homesta-help.html"
+                    class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 underline"
+                  >
+                    <span>つかいかた（説明書）</span>
+                  </a>
+                </div>
             </div>
         `;
-    }).join('');
 
-    // 「あたらしいカードをつくる」ボタン（最大5枚まで）
-    const newCardButton = users.length < 5
-        ? `
-        <button
-            id="add-new-card-btn"
-            class="w-full mt-4 p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
-            あたらしいカードをつくる
-        </button>
-        `
-        : '';
-
-    app.innerHTML = `
-        <div class="bg-white p-6 rounded-2xl shadow-lg">
-            <h1 class="text-2xl font-bold text-center mb-4 text-yellow-600">
-                どのカードをつかいますか？
-            </h1>
-            <div class="user-list mt-4">
-                ${userButtons || ''}
-            </div>
-            ${newCardButton}
-        </div>
-    `;
-
-    addHomeScreenListeners();
-}
-    
- // 設定画面の描画
-function renderSetup() {
-    isExchangeMode = false;
-    const state = getCurrentState();
-    if (!state) return renderHomeScreen();
-
-    // isSetup === true…まだカードを作っている途中（新規）
-    // isSetup === false…すでにカード画面がある（＝修正モード）
-    const isEditMode = !state.isSetup;
-
-    // ★ 修正モードに入った瞬間の状態をバックアップ
-    if (isEditMode) {
-        editBackup = JSON.parse(JSON.stringify(state));
-    } else {
-        editBackup = null;
+        addHomeScreenListeners();
     }
+    
+    // 設定画面
+    function renderSetup() {
+        isExchangeMode = false;
+        const state = getCurrentState();
+        if (!state) return renderHomeScreen();
 
-    // ごほうび位置を整理
-    state.rewards = state.rewards.filter(r => r < state.stampCount);
-    const lastIndex = state.stampCount - 1;
-    if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+        const isEditMode = !state.isSetup;
 
-    const minStampCount = isEditMode ? state.stampCount : 5;
-    const primaryBtnLabel = isEditMode ? 'カードを修正する' : 'カードをつくる！';
-    const titleText = isEditMode ? 'がんばりカードを修正しよう' : 'がんばりカードをつくろう';
+        if (isEditMode) {
+            editBackup = JSON.parse(JSON.stringify(state));
+        } else {
+            editBackup = null;
+        }
 
-    app.innerHTML = `
-        <div class="bg-white p-6 rounded-2xl shadow-lg">
-            <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">${titleText}</h1>
-            <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
+        state.rewards = state.rewards.filter(r => r < state.stampCount);
+        const lastIndex = state.stampCount - 1;
+        if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
 
-            <div class="mb-4">
-                <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
-                <input
-                    type="text"
-                    id="name-input"
-                    value="${state.name}"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                    placeholder="（れい）たろう">
-            </div>
+        const minStampCount = isEditMode ? state.stampCount : 5;
+        const primaryBtnLabel = isEditMode ? 'カードを修正する' : 'カードをつくる！';
+        const titleText = isEditMode ? 'がんばりカードを修正しよう' : 'がんばりカードをつくろう';
 
-            <div class="mb-4">
-                <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
-                <input
-                    type="text"
-                    id="goal-input"
-                    value="${state.goal || ''}"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                    placeholder="（れい）朝７時までにおきます">
-            </div>
+        app.innerHTML = `
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">${titleText}</h1>
+                <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
 
-            <div class="mb-6">
-                <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
-                <div id="background-selector" class="flex gap-3 justify-center"></div>
-            </div>
+                <div class="mb-4">
+                    <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
+                    <input
+                        type="text"
+                        id="name-input"
+                        value="${state.name}"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        placeholder="（れい）たろう">
+                </div>
 
-            <div class="mb-6">
-                <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">
-                    スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span>
-                </label>
-                <input
-                    type="range"
-                    id="stamp-count-slider"
-                    min="${minStampCount}"
-                    max="30"
-                    value="${state.stampCount}"
-                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <div class="mb-4">
+                    <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
+                    <input
+                        type="text"
+                        id="goal-input"
+                        value="${state.goal || ''}"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        placeholder="（れい）朝７時までにおきます">
+                </div>
+
+                <div class="mb-6">
+                    <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
+                    <div id="background-selector" class="flex gap-3 justify-center"></div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">
+                        スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span>
+                    </label>
+                    <input
+                        type="range"
+                        id="stamp-count-slider"
+                        min="${minStampCount}"
+                        max="30"
+                        value="${state.stampCount}"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    ${
+                        isEditMode
+                            ? '<p class="mt-1 text-xs text-gray-500">※ いまより少なくすることはできません</p>'
+                            : ''
+                    }
+                </div>
+
+                <div class="mb-6">
+                    <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
+                    <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
+                </div>
+
+                <button
+                    id="create-card-btn"
+                    class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
+                    ${primaryBtnLabel}
+                </button>
+
                 ${
                     isEditMode
-                        ? '<p class="mt-1 text-xs text-gray-500">※ いまより少なくすることはできません</p>'
-                        : ''
+                        ? `
+                    <div class="mt-6 flex justify-between">
+                        <button id="back-to-card-btn" class="text-sm text-gray-600 hover:underline">
+                            修正をしないでもどる
+                        </button>
+                        <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                            このカードをけす
+                        </button>
+                    </div>
+                    `
+                        : `
+                    <div class="mt-6 flex justify-between">
+                        <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">
+                            ユーザーきりかえ
+                        </button>
+                        <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                            このカードをけす
+                        </button>
+                    </div>
+                    `
                 }
             </div>
+        `;
 
-            <div class="mb-6">
-                <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
-                <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
-            </div>
+        renderRewardSelector();
+        renderBackgroundSelector();
+        addSetupListeners();
+    }
 
-            <button
-                id="create-card-btn"
-                class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
-                ${primaryBtnLabel}
-            </button>
-
-            ${
-                isEditMode
-                    ? `
-                <div class="mt-6 flex justify-between">
-                    <button id="back-to-card-btn" class="text-sm text-gray-600 hover:underline">
-                        修正をしないでもどる
-                    </button>
-                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
-                        このカードをけす
-                    </button>
-                </div>
-                `
-                    : `
-                <div class="mt-6 flex justify-between">
-                    <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">
-                        ユーザーきりかえ
-                    </button>
-                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
-                        このカードをけす
-                    </button>
-                </div>
-                `
-            }
-        </div>
-    `;
-
-    renderRewardSelector();
-    renderBackgroundSelector();
-    addSetupListeners();
-}
-
-    // 背景色選択の描画
     function renderBackgroundSelector() {
         const state = getCurrentState();
         if (!state) return;
@@ -781,7 +767,6 @@ function renderSetup() {
         }).join('');
     }
     
-    // ごほうび設定マスの描画
     function renderRewardSelector() {
         const state = getCurrentState();
         if (!state) return;
@@ -803,19 +788,48 @@ function renderSetup() {
         }
     }
 
-    // スタンプカード画面の描画
+    // カード画面
     function renderCard() {
         const state = getCurrentState();
         if (!state) return renderHomeScreen();
         state.isSetup = false;
         
         app.innerHTML = `
-            <div id="capture-area" style="background-color: ${state.cardBackground}; border-radius: 16px;">
-                <div class="text-center pt-4 mb-4">
-                    <h1 class="text-2xl font-bold text-yellow-800">${state.name}がんばりカード</h1>
-                    ${state.goal ? `<p class="text-lg font-semibold text-gray-600 mt-2">「${state.goal}」</p>` : ''}
+  <div id="capture-area"
+       class="rounded-2xl p-4"
+       style="background-color: ${state.cardBackground};">
+    <div class="text-center pt-4 mb-4">
+      <h1 class="text-2xl font-bold text-yellow-800">${state.name}がんばりカード</h1>
+      ${state.goal ? `<p class="text-lg font-semibold text-gray-600 mt-2">「${state.goal}」</p>` : ''}
+    </div>
+    <div class="stamp-card"></div>
+
+                <!-- メモ＆コメント（画像にも写る） -->
+                <div class="px-4 pb-4 mt-4 space-y-3">
+                  <div>
+                    <label for="memo-input" class="block text-sm font-bold text-gray-700 mb-1">
+                      メモ
+                    </label>
+                    <textarea
+                      id="memo-input"
+                      class="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white/80"
+                      rows="2"
+                      placeholder="その日のようすや、がんばったポイントをメモできます。"
+                    >${state.memo || ''}</textarea>
+                  </div>
+
+                  <div>
+                    <label for="comment-input" class="block text-sm font-bold text-gray-700 mb-1">
+                      ${state.name || 'お子さん'}へのコメント
+                    </label>
+                    <textarea
+                      id="comment-input"
+                      class="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white/80"
+                      rows="2"
+                      placeholder="たとえば「○○してくれて助かったよ」「チャレンジしたことがすごいね」など、ほめメッセージを書くと効果アップ！"
+                    >${state.comment || ''}</textarea>
+                  </div>
                 </div>
-                <div class="stamp-card" style="background-color: ${state.cardBackground};"></div>
             </div>
             <div id="action-buttons-container"></div>
         `;
@@ -835,7 +849,6 @@ function renderSetup() {
             const stamped = state.stamps.find(s => s.index === i);
             
             if (exchanged) {
-                // 交換済みの表示
                 content += `
                     <div class="exchanged-slot-content">
                         <svg class="exchanged-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
@@ -843,11 +856,9 @@ function renderSetup() {
                     </div>
                 `;
             } else if (stamped) {
-                // スタンプ済みの表示
                 content += `<img src="${stamped.image}" class="stamp-image" alt="スタンプ">`;
                 content += `<span class="stamp-date">${stamped.date}</span>`;
             }
-            // どちらでもなければ、空のマス(数字とご褒美アイコンのみ)
 
             slot.innerHTML = content;
             cardContainer.appendChild(slot);
@@ -873,8 +884,8 @@ function renderSetup() {
                     <div class="flex justify-center gap-4">
                         <button id="back-to-home-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition">ユーザーきりかえ</button>
                         <button id="go-to-setup-btn" class="bg-yellow-200 text-yellow-800 font-bold py-2 px-5 rounded-full hover:bg-yellow-300 transition">
-  今のカードを修正
-</button>
+                            今のカードを修正
+                        </button>
                     </div>
                 </div>
             `;
@@ -884,330 +895,318 @@ function renderSetup() {
         addCardListeners();
     }
     
-    // スタンプ選択モーダルのストックスタンプを更新
-function updateStockedStampsInModal() {
-    const state = getCurrentState();
-    if (!state) return;
+    function updateStockedStampsInModal() {
+        const state = getCurrentState();
+        if (!state) return;
 
-    for (let i = 0; i < 3; i++) {
-        const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
-        const deleteBtn = stockedStampDiv.querySelector('.stock-delete-btn');
+        for (let i = 0; i < 3; i++) {
+            const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
+            const deleteBtn = stockedStampDiv.querySelector('.stock-delete-btn');
 
-        // いったん中身をリセット（×ボタンだけ残す）
-        stockedStampDiv.querySelectorAll('img, span').forEach(el => el.remove());
+            stockedStampDiv.querySelectorAll('img, span').forEach(el => el.remove());
 
-        if (state.stockedStamps[i]) {
-            // 画像スタンプがあるとき
-            const imgEl = document.createElement('img');
-            imgEl.src = state.stockedStamps[i];
-            imgEl.alt = 'ストックスタンプ';
-            imgEl.className = 'stamp-image';
+            if (state.stockedStamps[i]) {
+                const imgEl = document.createElement('img');
+                imgEl.src = state.stockedStamps[i];
+                imgEl.alt = 'ストックスタンプ';
+                imgEl.className = 'stamp-image';
 
-            stockedStampDiv.appendChild(imgEl);
-            stockedStampDiv.classList.remove('bg-gray-100');
-            stockedStampDiv.classList.add('border-2', 'border-gray-300');
+                stockedStampDiv.appendChild(imgEl);
+                stockedStampDiv.classList.remove('bg-gray-100');
+                stockedStampDiv.classList.add('border-2', 'border-gray-300');
 
-            // クリックでスタンプとして使う
-            stockedStampDiv.onclick = (e) => {
-                // ×を押したときはスタンプ処理を走らせない
-                if (e.target.classList.contains('stock-delete-btn')) return;
-                applyStamp(state.stockedStamps[i]);
-            };
+                stockedStampDiv.onclick = (e) => {
+                    if (e.target.classList.contains('stock-delete-btn')) return;
+                    applyStamp(state.stockedStamps[i]);
+                };
 
-            // 削除ボタンを表示
-            deleteBtn.classList.remove('hidden');
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation(); // 親のクリック（スタンプ押し）を無効化
-                // i番目のストックスタンプを削除
-                state.stockedStamps.splice(i, 1);
-                saveAppData();
-                updateStockedStampsInModal();
-            };
+                deleteBtn.classList.remove('hidden');
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    state.stockedStamps.splice(i, 1);
+                    saveAppData();
+                    updateStockedStampsInModal();
+                };
 
-        } else {
-            // 空のスロット（＋表示）
-            const plusSpan = document.createElement('span');
-            plusSpan.className = 'text-gray-400 text-lg';
-            plusSpan.textContent = '+';
-            stockedStampDiv.appendChild(plusSpan);
-
-            stockedStampDiv.classList.add('bg-gray-100');
-            stockedStampDiv.classList.remove('border-2', 'border-gray-300');
-
-            // 画像がないときは削除ボタンを隠す
-            deleteBtn.classList.add('hidden');
-            deleteBtn.onclick = null;
-
-            // 空スロットクリック時は何もしない
-            stockedStampDiv.onclick = null;
-        }
-    }
-}
-
-    // --- イベントリスナー ---
-    
-   function addHomeScreenListeners() {
-    const addNewCardBtn = document.getElementById('add-new-card-btn');
-
-    // 「あたらしいカードをつくる」
-    if (addNewCardBtn) {
-        addNewCardBtn.addEventListener('click', () => {
-            const newUserState = {
-                name: '',
-                goal: '',
-                stampCount: 10,
-                rewards: [],
-                stamps: [],
-                exchanges: [],
-                isSetup: true,      // ★ 新しいカードは「設定画面から」スタート
-                stampingIndex: null,
-                stockedStamps: [],
-                cardBackground: '#fff9e6'
-            };
-            appData.users.push(newUserState);
-            appData.currentUserIndex = appData.users.length - 1;
-            saveAppData();
-            renderSetup();
-        });
-    }
-
-    // 既存カードを選択
-    document.querySelectorAll('.user-select-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const index = parseInt(e.currentTarget.dataset.index, 10);
-            appData.currentUserIndex = index;
-
-            const state = getCurrentState();
-            if (!state) {
-                renderHomeScreen();
-                return;
-            }
-
-            // 名前がまだなら設定画面から
-            if (state.isSetup || !state.name) {
-                renderSetup();
             } else {
-                renderCard();
+                const plusSpan = document.createElement('span');
+                plusSpan.className = 'text-gray-400 text-lg';
+                plusSpan.textContent = '+';
+                stockedStampDiv.appendChild(plusSpan);
+
+                stockedStampDiv.classList.add('bg-gray-100');
+                stockedStampDiv.classList.remove('border-2', 'border-gray-300');
+
+                deleteBtn.classList.add('hidden');
+                deleteBtn.onclick = null;
+                stockedStampDiv.onclick = null;
             }
-        });
-    });
-
-    // カード削除（ユーザー削除）
-    document.querySelectorAll('.delete-user-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const index = parseInt(e.currentTarget.dataset.index, 10);
-            deleteIndex = index;
-            deleteMode = 'user';
-
-            const userToDelete = appData.users[index];
-            const name = userToDelete.name || `カード ${index + 1}`;
-
-            const deleteModal = document.getElementById('delete-confirm-modal');
-            const deleteTitle = document.getElementById('delete-confirm-title');
-            deleteTitle.textContent = `「${name}」を削除しますか？`;
-            deleteModal.classList.add('is-visible');
-        });
-    });
-}
-
-   function addSetupListeners() {
-    const state = getCurrentState();
-    if (!state) return;
-
-    const isEditMode = !state.isSetup;
-
-    // 入力値の反映
-    document.getElementById('name-input').addEventListener('input', (e) => {
-        state.name = e.target.value;
-    });
-
-    document.getElementById('goal-input').addEventListener('input', (e) => {
-        state.goal = e.target.value;
-    });
-
-    document.getElementById('stamp-count-slider').addEventListener('input', (e) => {
-        const newCount = parseInt(e.target.value, 10);
-        state.stampCount = newCount;
-        document.getElementById('stamp-count-label').textContent = state.stampCount;
-
-        state.rewards = state.rewards.filter(r => r < state.stampCount);
-        const lastIndex = state.stampCount - 1;
-        if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
-        renderRewardSelector();
-    });
-
-    document.getElementById('reward-selector').addEventListener('click', (e) => {
-        const target = e.target.closest('div[data-index]');
-        if (!target) return;
-
-        const index = parseInt(target.dataset.index, 10);
-        if (index === state.stampCount - 1) return; // 最後のマスは固定でごほうび
-
-        if (state.rewards.includes(index)) {
-            state.rewards = state.rewards.filter(r => r !== index);
-        } else {
-            state.rewards.push(index);
         }
-        renderRewardSelector();
-    });
+    }
+    
+    function addHomeScreenListeners() {
+        const addNewCardBtn = document.getElementById('add-new-card-btn');
 
-    document.getElementById('background-selector').addEventListener('click', (e) => {
-        const target = e.target.closest('div[data-bg]');
-        if (!target) return;
-        state.cardBackground = target.dataset.bg;
-        renderBackgroundSelector();
-    });
-
-    // 「カードをつくる！」 or 「カードを修正する」
-    document.getElementById('create-card-btn').addEventListener('click', () => {
-        if (!state.name) {
-            alert('なまえをいれてね！');
-            return;
-        }
-
-        // 新規作成のときだけスタンプ履歴リセット
-        if (!isEditMode) {
-            state.stamps = [];
-            state.exchanges = [];
-        }
-
-        state.isSetup = false;
-        saveAppData();
-        renderCard();
-    });
-
-    // 戻る系ボタン
-    if (isEditMode) {
-        // 「修正をしないでもどる」：バックアップで元に戻す
-        const backToCardBtn = document.getElementById('back-to-card-btn');
-        if (backToCardBtn) {
-            backToCardBtn.addEventListener('click', () => {
-                if (editBackup) {
-                    appData.users[appData.currentUserIndex] = editBackup;
-                }
+        if (addNewCardBtn) {
+            addNewCardBtn.addEventListener('click', () => {
+                const newUserState = {
+                    name: '',
+                    goal: '',
+                    stampCount: 10,
+                    rewards: [],
+                    stamps: [],
+                    exchanges: [],
+                    isSetup: true,
+                    stampingIndex: null,
+                    stockedStamps: [],
+                    cardBackground: '#fff9e6',
+                    memo: '',
+                    comment: ''
+                };
+                appData.users.push(newUserState);
+                appData.currentUserIndex = appData.users.length - 1;
                 saveAppData();
-                renderCard();
+                renderSetup();
             });
         }
-    } else {
-        // 新規作成モードでは「ユーザーきりかえ」
-        const backToHomeBtn = document.getElementById('back-to-home-btn');
-        if (backToHomeBtn) {
-            backToHomeBtn.addEventListener('click', renderHomeScreen);
-        }
-    }
 
-    // カード削除ボタン（共通）
-    const deleteBtn = document.getElementById('delete-card-btn');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-            deleteIndex = appData.currentUserIndex;
-            deleteMode = 'user';
-            const currentName = state.name || `カード ${deleteIndex + 1}`;
+        document.querySelectorAll('.user-select-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.currentTarget.dataset.index, 10);
+                appData.currentUserIndex = index;
 
-            const deleteModal = document.getElementById('delete-confirm-modal');
-            const deleteTitle = document.getElementById('delete-confirm-title');
-            deleteTitle.textContent = `「${currentName}」を削除しますか？`;
-            deleteModal.classList.add('is-visible');
+                const state = getCurrentState();
+                if (!state) {
+                    renderHomeScreen();
+                    return;
+                }
+
+                if (state.isSetup || !state.name) {
+                    renderSetup();
+                } else {
+                    renderCard();
+                }
+            });
         });
-    }
-}
-    
-   function addCardListeners() {
-    const state = getCurrentState();
-    if (!state) return;
-    
-    // ▼ 既存：クリックしてスタンプを押す処理
-    app.querySelector('.stamp-card').addEventListener('click', (e) => {
-        const target = e.target.closest('.stamp-slot');
-        if (!target) return;
-        
-        const targetIndex = parseInt(target.dataset.index, 10);
-        const isStamped = state.stamps.some(s => s.index === targetIndex);
-        const isExchanged = state.exchanges.some(e => e.index === targetIndex);
 
-        if (isExchangeMode) {
-            if (isExchanged) return; 
-            applyExchange(targetIndex);
-        } else {
-            if (isStamped || isExchanged) return; 
-            state.stampingIndex = targetIndex;
-            updateStockedStampsInModal();
-            stampModal.classList.add('is-visible');
-        }
-    });
+        document.querySelectorAll('.delete-user-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(e.currentTarget.dataset.index, 10);
+                deleteIndex = index;
+                deleteMode = 'user';
 
-    // ▼ 既存：ボタン類のリスナー
-    const backToHomeBtn = document.getElementById('back-to-home-btn');
-    if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
-        
-    const goToSetupBtn = document.getElementById('go-to-setup-btn');
-    if (goToSetupBtn) goToSetupBtn.addEventListener('click', renderSetup);
-
-    const actionBtn = document.getElementById('action-btn');
-    if (actionBtn) actionBtn.addEventListener('click', handleCardCompletion);
-
-    const exchangeBtn = document.getElementById('exchange-btn');
-    if (exchangeBtn) {
-        exchangeBtn.addEventListener('click', () => {
-            isExchangeMode = !isExchangeMode;
-            exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
-            exchangeBtn.classList.toggle('bg-purple-500');
-            exchangeBtn.classList.toggle('hover:bg-purple-600');
-            exchangeBtn.classList.toggle('bg-red-500');
-            exchangeBtn.classList.toggle('hover:bg-red-600');
-        });
-    }
-
-    // ★ ここから追加：スタンプ長押しで削除
-    const slots = app.querySelectorAll('.stamp-slot');
-
-    slots.forEach(slot => {
-        let pressTimer = null;
-
-        const startPress = (event) => {
-            const idx = parseInt(slot.dataset.index, 10);
-            const isStamped = state.stamps.some(s => s.index === idx);
-            const isExchanged = state.exchanges.some(e => e.index === idx);
-
-            // スタンプが押されているマスだけ長押し削除を有効にする
-            if (!isStamped || isExchanged) return;
-
-            // 600ms 長押しで発火
-            pressTimer = setTimeout(() => {
-                deleteIndex = idx;
-                deleteMode = 'stamp';
+                const userToDelete = appData.users[index];
+                const name = userToDelete.name || `カード ${index + 1}`;
 
                 const deleteModal = document.getElementById('delete-confirm-modal');
                 const deleteTitle = document.getElementById('delete-confirm-title');
-                deleteTitle.textContent = `${idx + 1}ばんのスタンプを消しますか？`;
+                deleteTitle.textContent = `「${name}」を削除しますか？`;
                 deleteModal.classList.add('is-visible');
-            }, 600);
-        };
+            });
+        });
+    }
 
-        const cancelPress = () => {
-            if (pressTimer !== null) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
+    function addSetupListeners() {
+        const state = getCurrentState();
+        if (!state) return;
+
+        const isEditMode = !state.isSetup;
+
+        document.getElementById('name-input').addEventListener('input', (e) => {
+            state.name = e.target.value;
+        });
+
+        document.getElementById('goal-input').addEventListener('input', (e) => {
+            state.goal = e.target.value;
+        });
+
+        document.getElementById('stamp-count-slider').addEventListener('input', (e) => {
+            const newCount = parseInt(e.target.value, 10);
+            state.stampCount = newCount;
+            document.getElementById('stamp-count-label').textContent = state.stampCount;
+
+            state.rewards = state.rewards.filter(r => r < state.stampCount);
+            const lastIndex = state.stampCount - 1;
+            if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+            renderRewardSelector();
+        });
+
+        document.getElementById('reward-selector').addEventListener('click', (e) => {
+            const target = e.target.closest('div[data-index]');
+            if (!target) return;
+
+            const index = parseInt(target.dataset.index, 10);
+            if (index === state.stampCount - 1) return;
+
+            if (state.rewards.includes(index)) {
+                state.rewards = state.rewards.filter(r => r !== index);
+            } else {
+                state.rewards.push(index);
             }
-        };
+            renderRewardSelector();
+        });
 
-        // PC用
-        slot.addEventListener('mousedown', startPress);
-        slot.addEventListener('mouseup', cancelPress);
-        slot.addEventListener('mouseleave', cancelPress);
+        document.getElementById('background-selector').addEventListener('click', (e) => {
+            const target = e.target.closest('div[data-bg]');
+            if (!target) return;
+            state.cardBackground = target.dataset.bg;
+            renderBackgroundSelector();
+        });
 
-        // スマホ・タブレット用
-        slot.addEventListener('touchstart', startPress);
-        slot.addEventListener('touchend', cancelPress);
-        slot.addEventListener('touchcancel', cancelPress);
-    });
-    // ★ 追加ここまで
-}
+        document.getElementById('create-card-btn').addEventListener('click', () => {
+            if (!state.name) {
+                alert('なまえをいれてね！');
+                return;
+            }
 
+            if (!isEditMode) {
+                state.stamps = [];
+                state.exchanges = [];
+                state.memo = '';
+                state.comment = '';
+            }
 
-    // ポイント交換を適用する処理
+            state.isSetup = false;
+            saveAppData();
+            renderCard();
+        });
+
+        if (isEditMode) {
+            const backToCardBtn = document.getElementById('back-to-card-btn');
+            if (backToCardBtn) {
+                backToCardBtn.addEventListener('click', () => {
+                    if (editBackup) {
+                        appData.users[appData.currentUserIndex] = editBackup;
+                    }
+                    saveAppData();
+                    renderCard();
+                });
+            }
+        } else {
+            const backToHomeBtn = document.getElementById('back-to-home-btn');
+            if (backToHomeBtn) {
+                backToHomeBtn.addEventListener('click', renderHomeScreen);
+            }
+        }
+
+        const deleteBtn = document.getElementById('delete-card-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                deleteIndex = appData.currentUserIndex;
+                deleteMode = 'user';
+                const currentName = state.name || `カード ${deleteIndex + 1}`;
+
+                const deleteModal = document.getElementById('delete-confirm-modal');
+                const deleteTitle = document.getElementById('delete-confirm-title');
+                deleteTitle.textContent = `「${currentName}」を削除しますか？`;
+                deleteModal.classList.add('is-visible');
+            });
+        }
+    }
+    
+    function addCardListeners() {
+        const state = getCurrentState();
+        if (!state) return;
+        
+        app.querySelector('.stamp-card').addEventListener('click', (e) => {
+            const target = e.target.closest('.stamp-slot');
+            if (!target) return;
+            
+            const targetIndex = parseInt(target.dataset.index, 10);
+            const isStamped = state.stamps.some(s => s.index === targetIndex);
+            const isExchanged = state.exchanges.some(e => e.index === targetIndex);
+
+            if (isExchangeMode) {
+                if (isExchanged) return; 
+                applyExchange(targetIndex);
+            } else {
+                if (isStamped || isExchanged) return; 
+                state.stampingIndex = targetIndex;
+                updateStockedStampsInModal();
+                stampModal.classList.add('is-visible');
+            }
+        });
+
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
+            
+        const goToSetupBtn = document.getElementById('go-to-setup-btn');
+        if (goToSetupBtn) goToSetupBtn.addEventListener('click', renderSetup);
+
+        const actionBtn = document.getElementById('action-btn');
+        if (actionBtn) actionBtn.addEventListener('click', handleCardCompletion);
+
+        const exchangeBtn = document.getElementById('exchange-btn');
+        if (exchangeBtn) {
+            exchangeBtn.addEventListener('click', () => {
+                isExchangeMode = !isExchangeMode;
+                exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
+                exchangeBtn.classList.toggle('bg-purple-500');
+                exchangeBtn.classList.toggle('hover:bg-purple-600');
+                exchangeBtn.classList.toggle('bg-red-500');
+                exchangeBtn.classList.toggle('hover:bg-red-600');
+            });
+        }
+
+        // メモ・コメント入力の保存
+        const memoInput = document.getElementById('memo-input');
+        const commentInput = document.getElementById('comment-input');
+
+        if (memoInput) {
+            memoInput.addEventListener('input', (e) => {
+                state.memo = e.target.value;
+                saveAppData();
+            });
+        }
+        if (commentInput) {
+            commentInput.addEventListener('input', (e) => {
+                state.comment = e.target.value;
+                saveAppData();
+            });
+        }
+
+        // スタンプ長押しで削除
+        const slots = app.querySelectorAll('.stamp-slot');
+
+        slots.forEach(slot => {
+            let pressTimer = null;
+
+            const startPress = (event) => {
+                const idx = parseInt(slot.dataset.index, 10);
+                const isStamped = state.stamps.some(s => s.index === idx);
+                const isExchanged = state.exchanges.some(e => e.index === idx);
+
+                if (!isStamped || isExchanged) return;
+
+                pressTimer = setTimeout(() => {
+                    deleteIndex = idx;
+                    deleteMode = 'stamp';
+
+                    const deleteModal = document.getElementById('delete-confirm-modal');
+                    const deleteTitle = document.getElementById('delete-confirm-title');
+                    deleteTitle.textContent = `${idx + 1}ばんのスタンプを消しますか？`;
+                    deleteModal.classList.add('is-visible');
+                }, 600);
+            };
+
+            const cancelPress = () => {
+                if (pressTimer !== null) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            };
+
+            slot.addEventListener('mousedown', startPress);
+            slot.addEventListener('mouseup', cancelPress);
+            slot.addEventListener('mouseleave', cancelPress);
+
+            slot.addEventListener('touchstart', startPress);
+            slot.addEventListener('touchend', cancelPress);
+            slot.addEventListener('touchcancel', cancelPress);
+        });
+    }
+
     function applyExchange(targetIndex) {
         const state = getCurrentState();
         if (!state) return;
@@ -1229,7 +1228,6 @@ function updateStockedStampsInModal() {
         }
     }
 
-    // スタンプを押す処理
     async function applyStamp(imageSrc) {
         const state = getCurrentState();
         if (!state || state.stampingIndex === null) return;
@@ -1262,7 +1260,6 @@ function updateStockedStampsInModal() {
         stampModal.classList.remove('is-visible');
     }
 
-    // カード完成時のアクション
     async function handleCardCompletion() {
         const state = getCurrentState();
         if (!state) return;
@@ -1301,20 +1298,20 @@ function updateStockedStampsInModal() {
 
             } catch (err) {
                 console.error('画像キャプチャに失敗しました:', err);
-                console.log('画像の保存に失敗しました。');
                 document.body.style.overflow = 'auto';
             }
             
         } else if (action === 'next') {
             state.stamps = [];
             state.exchanges = [];
+            state.memo = '';
+            state.comment = '';
             state.isSetup = true;
             saveAppData();
             renderSetup();
         }
     }
     
-    // デフォルトスタンプSVGを生成（★修正版）
     function createStampSVG(type) {
         let svgContent = '';
         switch(type) {
@@ -1337,11 +1334,9 @@ function updateStockedStampsInModal() {
                     '</svg>';
                 break;
         }
-        // SVG を適切にエンコードして dataURL にする
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgContent);
     }
 
-    // お祝い表示
     function showCelebration() {
         const state = getCurrentState();
         if (!state) return;
@@ -1357,45 +1352,39 @@ function updateStockedStampsInModal() {
         });
     }
 
-    // --- 初期化処理 ---
     function init() {
         const deleteModal = document.getElementById('delete-confirm-modal');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
-       cancelDeleteBtn.addEventListener('click', () => {
-    deleteModal.classList.remove('is-visible');
-    deleteIndex = null;
-    deleteMode = null; // ★ 追加
-});
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.classList.remove('is-visible');
+            deleteIndex = null;
+            deleteMode = null;
+        });
 
         confirmDeleteBtn.addEventListener('click', () => {
-    if (deleteIndex === null) return;
+            if (deleteIndex === null) return;
 
-    if (deleteMode === 'user') {
-        // ユーザー（カード）削除
-        appData.users.splice(deleteIndex, 1);
-        appData.currentUserIndex = null;
-        saveAppData();
-        renderHomeScreen();
-    } else if (deleteMode === 'stamp') {
-        // スタンプ削除
-        const state = getCurrentState();
-        if (state) {
-            // 対象マスのスタンプだけ消す
-            state.stamps = state.stamps.filter(s => s.index !== deleteIndex);
-            saveAppData();
-            renderCard();
-        }
-    }
+            if (deleteMode === 'user') {
+                appData.users.splice(deleteIndex, 1);
+                appData.currentUserIndex = null;
+                saveAppData();
+                renderHomeScreen();
+            } else if (deleteMode === 'stamp') {
+                const state = getCurrentState();
+                if (state) {
+                    state.stamps = state.stamps.filter(s => s.index !== deleteIndex);
+                    saveAppData();
+                    renderCard();
+                }
+            }
 
-    const deleteModal = document.getElementById('delete-confirm-modal');
-    deleteModal.classList.remove('is-visible');
-    deleteIndex = null;
-    deleteMode = null;
-});
+            deleteModal.classList.remove('is-visible');
+            deleteIndex = null;
+            deleteMode = null;
+        });
 
-        // スタンプ選択モーダルのリスナー
         document.getElementById('cancel-stamp').addEventListener('click', () => {
             stampModal.classList.remove('is-visible');
             const state = getCurrentState();
@@ -1406,63 +1395,57 @@ function updateStockedStampsInModal() {
         document.getElementById('default-stamp-2').addEventListener('click', () => applyStamp(createStampSVG('heart')));
         document.getElementById('default-stamp-3').addEventListener('click', () => applyStamp(createStampSVG('thumb')));
     
-        // 画像アップロードのリスナー
-      document.getElementById('image-upload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    const state = getCurrentState();
-    if (!file || !state) {
-        e.target.value = '';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            // 最大サイズ（長い辺）を 300px に制限
-            const maxSize = 300;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-                if (width > maxSize) {
-                    height = Math.round(height * (maxSize / width));
-                    width = maxSize;
-                }
-            } else {
-                if (height > maxSize) {
-                    width = Math.round(width * (maxSize / height));
-                    height = maxSize;
-                }
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const state = getCurrentState();
+            if (!file || !state) {
+                e.target.value = '';
+                return;
             }
 
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const maxSize = 300;
+                    let width = img.width;
+                    let height = img.height;
 
-            // JPEG 形式・画質 0.8 で軽量化
-            const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = Math.round(height * (maxSize / width));
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = Math.round(width * (maxSize / height));
+                            height = maxSize;
+                        }
+                    }
 
-            // ストックスタンプに追加（最大3つ）
-            if (state.stockedStamps.length >= 3) {
-                state.stockedStamps.shift();
-            }
-            state.stockedStamps.push(imageUrl);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
 
-            saveAppData();
-            applyStamp(imageUrl);
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+                    const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
 
-    // 同じファイルを続けて選べるようにクリア
-    e.target.value = '';
-});
+                    if (state.stockedStamps.length >= 3) {
+                        state.stockedStamps.shift();
+                    }
+                    state.stockedStamps.push(imageUrl);
 
-        // お祝い画面を閉じるリスナー
+                    saveAppData();
+                    applyStamp(imageUrl);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            e.target.value = '';
+        });
+
         document.getElementById('close-celebration').addEventListener('click', () => {
             celebrationScreen.classList.remove('is-visible');
         });
@@ -1481,8 +1464,8 @@ function updateStockedStampsInModal() {
     }
 
     init();
-});
-</script>
+  });
+  </script>
 
 </body>
 </html>
