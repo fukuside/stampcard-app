@@ -1,264 +1,322 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ほめほめスタンプ（ほめスタ）</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ほめほめスタンプ（ほめスタ）</title>
 
-    <!-- PWA manifest 読み込み（GitHub Pages用） -->
-    <link rel="manifest" href="manifest.webmanifest">
+  <!-- PWA manifest 読み込み（GitHub Pages用） -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <!-- iPhone用アイコン -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <!-- favicon（任意） -->
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <!-- テーマカラー（アドレスバー色など） -->
+  <meta name="theme-color" content="#FFF4C7" />
 
-    <!-- iPhone用アイコン -->
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FMFQS52W93"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FMFQS52W93');
+  </script>
 
-    <!-- favicon（任意） -->
-    <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- canvas-confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- テーマカラー（アドレスバー色など） -->
-    <meta name="theme-color" content="#FFF4C7">
+  <style>
+    body {
+      font-family: 'Inter', 'Helvetica Neue', 'Arial',
+        'Hiragino Kaku Gothic ProN', 'Hiragino Sans',
+        'BIZ UDPGothic', Meiryo, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FMFQS52W93"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-FMFQS52W93');
-    </script>
+    .stamp-card {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      background-color: transparent;
+      box-shadow: none;
+    }
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- canvas-confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-    <!-- html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    .stamp-slot {
+      position: relative;
+      width: 100%;
+      padding-bottom: 100%;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 3px dashed #fbd38d;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .stamp-slot:hover { transform: scale(1.05); }
 
-    <style>
-        body {
-            font-family: 'Inter', 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'BIZ UDPGothic', Meiryo, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+    .stamp-slot.is-reward .reward-icon { display: block; }
 
-        .stamp-card {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    padding: 16px;
-    border-radius: 16px;          /* 角の丸みだけ残す（不要なら消してOK） */
-    background-color: transparent; /* 背景色なしにする */
-    box-shadow: none;             /* ← 影を消すポイント */
-}
+    .reward-icon {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      color: #f6ad55;
+      z-index: 5;
+      pointer-events: none;
+    }
 
+    .stamp-image {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      z-index: 10;
+    }
 
-        .stamp-slot {
-            position: relative;
-            width: 100%;
-            padding-bottom: 100%;
-            border-radius: 50%;
-            background-color: #ffffff;
-            border: 3px dashed #fbd38d;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .stamp-slot:hover {
-            transform: scale(1.05);
-        }
+    .stamp-date {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      color: #6a4d0f;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 2px 5px;
+      border-radius: 8px;
+      z-index: 15;
+      white-space: nowrap;
+    }
 
-        .stamp-slot.is-reward .reward-icon {
-            display: block;
-        }
-        
-        .reward-icon {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: #f6ad55;
-            z-index: 5;
-            pointer-events: none;
-        }
+    .stock-delete-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 9999px;
+      border: none;
+      background-color: rgba(0,0,0,0.5);
+      color: #fff;
+      font-size: 14px;
+      line-height: 18px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 20;
+    }
 
-        .stamp-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-            z-index: 10;
-        }
-        
-        .stamp-date {
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.65rem;
-            color: #6a4d0f;
-            background-color: rgba(255, 255, 255, 0.7);
-            padding: 2px 5px;
-            border-radius: 8px;
-            z-index: 15;
-            white-space: nowrap;
-        }
+    .exchanged-slot-content {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      border-radius: 50%;
+      background-color: #e5e7eb;
+    }
+    .exchanged-icon { font-size: 1.5rem; color: #16a34a; }
+    .exchanged-date { font-size: 0.75rem; color: #4b5563; font-weight: 600; }
 
-        .stock-delete-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 20px;
-            height: 20px;
-            border-radius: 9999px;
-            border: none;
-            background-color: rgba(0,0,0,0.5);
-            color: #fff;
-            font-size: 14px;
-            line-height: 18px;
-            text-align: center;
-            cursor: pointer;
-            z-index: 20;
-        }
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-backdrop.is-visible { opacity: 1; visibility: visible; }
+    .modal-content {
+      background-color: white;
+      padding: 24px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .modal-backdrop.is-visible .modal-content { transform: scale(1); }
 
-        .exchanged-slot-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            border-radius: 50%;
-            background-color: #e5e7eb;
-        }
-        .exchanged-icon {
-            font-size: 1.5rem;
-            color: #16a34a;
-        }
-        .exchanged-date {
-            font-size: 0.75rem;
-            color: #4b5563;
-            font-weight: 600;
-        }
+    #celebration-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: rgba(255, 250, 230, 0.9);
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+    }
+    #celebration-screen.is-visible { opacity: 1; visibility: visible; }
+    #celebration-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal-backdrop.is-visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 24px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 400px;
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
-        }
-        .modal-backdrop.is-visible .modal-content {
-             transform: scale(1);
-        }
-        
-        #celebration-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background: rgba(255, 250, 230, 0.9);
-            backdrop-filter: blur(5px);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease;
-        }
-        #celebration-screen.is-visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        #celebration-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+    .stamp-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+    }
+    .stamp-overlay.is-visible { opacity: 1; }
 
-        .stamp-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 60;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-out;
-        }
-        .stamp-overlay.is-visible {
-            opacity: 1;
-        }
-        .animated-stamp {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 50%;
-            transform: scale(2);
-            opacity: 0;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-        .animated-stamp.animate-in {
-            transform: scale(1) translateY(-20px);
-            opacity: 1;
-        }
-        .animated-stamp.animate-out {
-            transform: scale(0.5);
-            opacity: 0;
-        }
-    </style>
+    .animated-stamp {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 50%;
+      transform: scale(2);
+      opacity: 0;
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    }
+    .animated-stamp.animate-in {
+      transform: scale(1) translateY(-20px);
+      opacity: 1;
+    }
+    .animated-stamp.animate-out {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+
+    /* ========= ここから：メモ＆コメントを「シール風」に（通常表示もキャプチャも） ========= */
+
+    /* 画像保存用：文章を枠内で折り返し＆省略（3行） */
+    .clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
+    /* キャプチャ時だけ textarea を隠す */
+    .capture-mode textarea { display: none !important; }
+
+    /* シール（付箋）っぽい箱：影＋縁＋角丸＋テープ風 */
+    .sticker {
+      position: relative;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 2px dashed rgba(251, 191, 36, 0.65); /* amber */
+      box-shadow:
+        0 8px 18px rgba(0,0,0,0.10),
+        0 2px 0 rgba(255,255,255,0.65) inset;
+      padding: 12px 12px;
+    }
+    /* 上に半透明テープ */
+    .sticker::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 14px;
+      width: 92px;
+      height: 22px;
+      border-radius: 10px;
+      background: rgba(253, 230, 138, 0.65); /* amber-200 */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      transform: rotate(-2.5deg);
+      pointer-events: none;
+    }
+    /* 右下に小さな折れ */
+    .sticker::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 24px;
+      height: 24px;
+      background: rgba(251, 191, 36, 0.25);
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      border-bottom-right-radius: 16px;
+      pointer-events: none;
+    }
+
+    .sticker-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #7c2d12; /* amber/brown */
+      margin-bottom: 6px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .sticker-label .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: #f59e0b; /* amber-500 */
+      box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset;
+    }
+
+    /* textareaを「シール内の紙」っぽく */
+    .sticker-textarea {
+      width: 100%;
+      resize: none;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #374151;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .sticker-textarea::placeholder { color: rgba(55, 65, 81, 0.55); }
+
+    /* キャプチャ時に表示する本文（同じくシール風） */
+    .capture-text {
+      color: #374151;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: normal;
+    }
+    /* ========= ここまで ========= */
+  </style>
 </head>
-<body class="bg-amber-50">
 
+<body class="bg-amber-50">
   <div class="p-4 max-w-lg mx-auto">
     <!-- ロゴ -->
     <div class="flex justify-center mb-4">
-      <img
-        src="homesta-logo.png"
-        alt="ほめスタ ロゴ"
-        class="w-40 md:w-56 max-w-full h-auto mx-auto"
-      >
+      <img src="homesta-logo.png" alt="ほめスタ ロゴ" class="w-40 md:w-56 max-w-full h-auto mx-auto" />
     </div>
 
     <!-- アプリ本体 -->
@@ -267,36 +325,27 @@
 
   <!-- フッター（右寄せ） -->
   <div class="w-full mt-10 pb-6 flex flex-col items-end gap-3 pr-4">
-
     <!-- 問い合わせボタン -->
     <button id="contactButton"
-      class="bg-yellow-200 border border-gray-300 shadow-md
-             px-4 py-2 rounded-lg text-sm z-50 w-48 text-center">
+      class="bg-yellow-200 border border-gray-300 shadow-md px-4 py-2 rounded-lg text-sm z-50 w-48 text-center">
       問い合わせはこちら
     </button>
 
     <!-- 社名ロゴ -->
     <div class="flex items-center gap-2 opacity-80">
-      <img src="fukushi-logo.png"
-           alt="一般社団法人福祉でつながる会 ロゴ"
-           class="w-8 h-8 rounded-full object-cover">
-      <p class="text-xs text-gray-600 font-semibold">
-        一般社団法人福祉でつながる会
-      </p>
+      <img src="fukushi-logo.png" alt="一般社団法人福祉でつながる会 ロゴ" class="w-8 h-8 rounded-full object-cover" />
+      <p class="text-xs text-gray-600 font-semibold">一般社団法人福祉でつながる会</p>
     </div>
   </div>
 
   <!-- フィードバックフォーム -->
   <div id="feedbackForm"
-    class="fixed bottom-32 right-4 bg-white border border-gray-300 rounded-lg shadow-xl
-           p-4 w-72 z-50 hidden">
-
+    class="fixed bottom-32 right-4 bg-white border border-gray-300 rounded-lg shadow-xl p-4 w-72 z-50 hidden">
     <h3 class="text-lg mb-3 font-bold">お問い合わせ</h3>
 
     <form id="feedbackSubmitForm">
       <label class="text-sm">アプリを選択（必須）</label>
-      <select id="appName" required
-        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+      <select id="appName" required class="w-full border rounded px-2 py-1 mb-3 text-sm">
         <option value="" disabled selected>選択してください</option>
         <option value="あとなんかい？アプリ">あとなんかい？アプリ</option>
         <option value="リフレミー">リフレミー</option>
@@ -305,8 +354,7 @@
       </select>
 
       <label class="text-sm">種別</label>
-      <select id="feedbackType"
-        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+      <select id="feedbackType" class="w-full border rounded px-2 py-1 mb-3 text-sm">
         <option>バグ報告</option>
         <option>要望</option>
         <option>質問</option>
@@ -314,29 +362,23 @@
       </select>
 
       <label class="text-sm">内容</label>
-      <textarea id="content"
-        class="w-full border rounded px-2 py-1 mb-3 text-sm h-20"
-        required></textarea>
+      <textarea id="content" class="w-full border rounded px-2 py-1 mb-3 text-sm h-20" required></textarea>
 
       <label class="text-sm">メールアドレス（任意）</label>
-      <input id="email" type="email"
-        class="w-full border rounded px-2 py-1 mb-3 text-sm">
+      <input id="email" type="email" class="w-full border rounded px-2 py-1 mb-3 text-sm" />
 
-      <button type="submit"
-        class="w-full bg-orange-300 py-2 rounded-lg text-sm font-bold mb-2">
+      <button type="submit" class="w-full bg-orange-300 py-2 rounded-lg text-sm font-bold mb-2">
         送信
       </button>
 
-      <button type="button" id="closeFeedback"
-        class="w-full bg-gray-200 py-2 rounded-lg text-sm">
+      <button type="button" id="closeFeedback" class="w-full bg-gray-200 py-2 rounded-lg text-sm">
         閉じる
       </button>
     </form>
 
     <div id="feedbackThanks" class="hidden text-center">
       <p class="mb-4">送信ありがとうございます！</p>
-      <button type="button" id="closeThanks"
-        class="w-full bg-gray-200 py-2 rounded-lg text-sm">
+      <button type="button" id="closeThanks" class="w-full bg-gray-200 py-2 rounded-lg text-sm">
         閉じる
       </button>
     </div>
@@ -348,51 +390,73 @@
       <h3 class="text-xl font-bold text-center mb-4 text-gray-700">スタンプをえらんでね</h3>
       <div class="grid grid-cols-3 gap-4 mb-4">
         <!-- デフォルトスタンプ -->
-        <div id="default-stamp-1" class="p-2 bg-yellow-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-yellow-200 transition">
-          <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+        <div id="default-stamp-1"
+          class="p-2 bg-yellow-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-yellow-200 transition">
+          <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+            </path>
+          </svg>
         </div>
-        <div id="default-stamp-2" class="p-2 bg-blue-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-blue-200 transition">
-          <svg class="w-10 h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+        <div id="default-stamp-2"
+          class="p-2 bg-blue-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-blue-200 transition">
+          <svg class="w-10 h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+              clip-rule="evenodd"></path>
+          </svg>
         </div>
-        <div id="default-stamp-3" class="p-2 bg-green-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-green-200 transition">
-          <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path></svg>
+        <div id="default-stamp-3"
+          class="p-2 bg-green-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-green-200 transition">
+          <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z">
+            </path>
+          </svg>
         </div>
-        
+
         <!-- ストックされたピクチャースタンプ -->
-        <div id="stocked-stamp-0" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+        <div id="stocked-stamp-0"
+          class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
           <button class="stock-delete-btn hidden" type="button">×</button>
           <span class="text-gray-400 text-lg"></span>
         </div>
-        <div id="stocked-stamp-1" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+        <div id="stocked-stamp-1"
+          class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
           <button class="stock-delete-btn hidden" type="button">×</button>
           <span class="text-gray-400 text-lg"></span>
         </div>
-        <div id="stocked-stamp-2" class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
+        <div id="stocked-stamp-2"
+          class="relative p-2 bg-gray-100 rounded-full aspect-square flex justify-center items-center cursor-pointer hover:bg-gray-200 transition">
           <button class="stock-delete-btn hidden" type="button">×</button>
           <span class="text-gray-400 text-lg"></span>
         </div>
       </div>
-      <label for="image-upload" class="w-full text-center block bg-orange-400 text-white font-bold py-3 px-4 rounded-lg cursor-pointer hover:bg-orange-500 transition">
+      <label for="image-upload"
+        class="w-full text-center block bg-orange-400 text-white font-bold py-3 px-4 rounded-lg cursor-pointer hover:bg-orange-500 transition">
         しゃしんからえらぶ
       </label>
-      <input type="file" id="image-upload" class="hidden" accept="image/*">
+      <input type="file" id="image-upload" class="hidden" accept="image/*" />
       <button id="cancel-stamp" class="w-full text-center mt-3 text-gray-600 py-2">キャンセル</button>
     </div>
   </div>
-  
+
   <!-- ご褒美達成お祝い画面 -->
   <div id="celebration-screen">
     <canvas id="celebration-canvas"></canvas>
     <div class="text-center p-4 relative z-10">
       <p class="text-4xl font-bold text-orange-500 mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">やったね！</p>
       <p id="celebration-message" class="text-xl font-semibold text-gray-700"></p>
-      <button id="close-celebration" class="mt-8 bg-white text-orange-500 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-50 transition">とじる</button>
+      <button id="close-celebration"
+        class="mt-8 bg-white text-orange-500 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-50 transition">
+        とじる
+      </button>
     </div>
   </div>
 
   <!-- スタンプアニメーション用オーバーレイ -->
   <div id="stamp-overlay" class="stamp-overlay">
-    <img id="animated-stamp-image" src="" alt="スタンプ" class="animated-stamp">
+    <img id="animated-stamp-image" src="" alt="スタンプ" class="animated-stamp" />
   </div>
 
   <!-- 削除確認モーダル -->
@@ -401,8 +465,10 @@
       <h3 id="delete-confirm-title" class="text-xl font-bold text-center mb-4 text-gray-700"></h3>
       <p class="text-gray-600 mb-6">この操作は取り消せません。</p>
       <div class="flex justify-center gap-4">
-        <button id="cancel-delete-btn" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">キャンセル</button>
-        <button id="confirm-delete-btn" class="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600">削除する</button>
+        <button id="cancel-delete-btn"
+          class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">キャンセル</button>
+        <button id="confirm-delete-btn"
+          class="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600">削除する</button>
       </div>
     </div>
   </div>
@@ -459,193 +525,177 @@
 
   <!-- アプリ本体スクリプト -->
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const app = document.getElementById('app');
-    const stampModal = document.getElementById('stamp-modal');
-    const celebrationScreen = document.getElementById('celebration-screen');
-    const celebrationCanvas = document.getElementById('celebration-canvas');
-    const stampOverlay = document.getElementById('stamp-overlay');
-    const animatedStampImage = document.getElementById('animated-stamp-image');
-    let confettiInstance = confetti.create(celebrationCanvas, { resize: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      const app = document.getElementById('app');
+      const stampModal = document.getElementById('stamp-modal');
+      const celebrationScreen = document.getElementById('celebration-screen');
+      const celebrationCanvas = document.getElementById('celebration-canvas');
+      const stampOverlay = document.getElementById('stamp-overlay');
+      const animatedStampImage = document.getElementById('animated-stamp-image');
+      let confettiInstance = confetti.create(celebrationCanvas, { resize: true });
 
-    let appData = {
+      let appData = {
         currentUserIndex: null,
         users: []
-    };
-    let deleteIndex = null;
-    let deleteMode = null;   // 'user' / 'stamp'
-    let isExchangeMode = false;
-    let editBackup = null;
-    
-    const getCurrentState = () => {
+      };
+
+      let deleteIndex = null;
+      let deleteMode = null; // 'user' / 'stamp'
+      let isExchangeMode = false;
+      let editBackup = null;
+
+      const getCurrentState = () => {
         if (appData.currentUserIndex === null || !appData.users[appData.currentUserIndex]) {
-            return null;
+          return null;
         }
         return appData.users[appData.currentUserIndex];
-    };
+      };
 
-    function saveAppData() {
+      function saveAppData() {
         localStorage.setItem('ganbariCardAppData', JSON.stringify(appData));
-    }
+      }
 
-    function loadAppData() {
+      function loadAppData() {
         const savedData = localStorage.getItem('ganbariCardAppData');
         if (savedData) {
-            appData = JSON.parse(savedData);
+          appData = JSON.parse(savedData);
 
-            appData.users.forEach(user => {
-                if (typeof user.cardBackground === 'undefined') {
-                    user.cardBackground = '#fff9e6'; 
-                }
-                if (typeof user.exchanges === 'undefined') {
-                    user.exchanges = [];
-                }
-                if (!Array.isArray(user.stockedStamps)) {
-                    user.stockedStamps = [];
-                }
-                if (typeof user.memo === 'undefined') {
-                    user.memo = '';
-                }
-                if (typeof user.comment === 'undefined') {
-                    user.comment = '';
-                }
+          appData.users.forEach(user => {
+            if (typeof user.cardBackground === 'undefined') user.cardBackground = '#fff9e6';
+            if (typeof user.exchanges === 'undefined') user.exchanges = [];
+            if (!Array.isArray(user.stockedStamps)) user.stockedStamps = [];
+            if (typeof user.memo === 'undefined') user.memo = '';
+            if (typeof user.comment === 'undefined') user.comment = '';
+            if (typeof user.cardNumber === 'undefined') user.cardNumber = 1; // ★追加：何枚目
 
-                if (Array.isArray(user.stamps)) {
-                    user.stamps.forEach(s => {
-                        if (!s || typeof s.image !== 'string') return;
-                        const trimmed = s.image.trim();
-                        if (trimmed.startsWith('<img')) {
-                            const m = trimmed.match(/src="([^"]+)"/);
-                            if (m) {
-                                s.image = m[1];
-                            }
-                        }
-                    });
+            if (Array.isArray(user.stamps)) {
+              user.stamps.forEach(s => {
+                if (!s || typeof s.image !== 'string') return;
+                const trimmed = s.image.trim();
+                if (trimmed.startsWith('<img')) {
+                  const m = trimmed.match(/src="([^"]+)"/);
+                  if (m) s.image = m[1];
                 }
-            });
-            return;
+              });
+            }
+          });
+          return;
         }
 
         // 旧バージョンからの移行
         const oldSavedState = localStorage.getItem('ganbariCardState');
-        if(oldSavedState){
-            const oldState = JSON.parse(oldSavedState);
-            if (oldState.name || (oldState.stamps && oldState.stamps.length > 0)) {
-                oldState.goal = oldState.goal || '';
-                oldState.cardBackground = '#fff9e6';
-                oldState.exchanges = [];
-                oldState.stockedStamps = oldState.stockedStamps || [];
-                oldState.memo = '';
-                oldState.comment = '';
-                if (Array.isArray(oldState.stamps)) {
-                    oldState.stamps.forEach(s => {
-                        if (!s || typeof s.image !== 'string') return;
-                        const trimmed = s.image.trim();
-                        if (trimmed.startsWith('<img')) {
-                            const m = trimmed.match(/src="([^"]+)"/);
-                            if (m) {
-                                s.image = m[1];
-                            }
-                        }
-                    });
-                }
-                appData.users.push(oldState);
-                appData.currentUserIndex = 0;
-            }
-            localStorage.removeItem('ganbariCardState');
-            saveAppData();
-        }
-    }
+        if (oldSavedState) {
+          const oldState = JSON.parse(oldSavedState);
+          if (oldState.name || (oldState.stamps && oldState.stamps.length > 0)) {
+            oldState.goal = oldState.goal || '';
+            oldState.cardBackground = '#fff9e6';
+            oldState.exchanges = [];
+            oldState.stockedStamps = oldState.stockedStamps || [];
+            oldState.memo = '';
+            oldState.comment = '';
+            oldState.cardNumber = 1; // ★追加：移行時も1枚目
 
-    // ホーム画面
-    function renderHomeScreen() {
+            if (Array.isArray(oldState.stamps)) {
+              oldState.stamps.forEach(s => {
+                if (!s || typeof s.image !== 'string') return;
+                const trimmed = s.image.trim();
+                if (trimmed.startsWith('<img')) {
+                  const m = trimmed.match(/src="([^"]+)"/);
+                  if (m) s.image = m[1];
+                }
+              });
+            }
+            appData.users.push(oldState);
+            appData.currentUserIndex = 0;
+          }
+          localStorage.removeItem('ganbariCardState');
+          saveAppData();
+        }
+      }
+
+      // ホーム画面
+      function renderHomeScreen() {
         isExchangeMode = false;
         appData.currentUserIndex = null;
 
         const users = appData.users || [];
 
         const userButtons = users.map((user, index) => {
-            const name = user.name || `カード ${index + 1}`;
-            const filledSlots = (user.stamps?.length || 0) + (user.exchanges?.length || 0);
-            const total = user.stampCount || 0;
-            const isComplete = total > 0 && filledSlots === total;
-            const progressLabel = total > 0 ? `${filledSlots}/${total}` : '0/10';
+          const name = user.name || `カード ${index + 1}`;
+          const filledSlots = (user.stamps?.length || 0) + (user.exchanges?.length || 0);
+          const total = user.stampCount || 0;
+          const isComplete = total > 0 && filledSlots === total;
+          const progressLabel = total > 0 ? `${filledSlots}/${total}` : '0/10';
 
-            return `
-                <div class="flex items-center mb-3">
-                    <button
-                        data-index="${index}"
-                        class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
-                        <span class="text-lg font-bold text-gray-700">${name}</span>
-                        <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">
-                            ${isComplete ? 'かんせい！' : progressLabel}
-                        </span>
-                    </button>
-                    <button
-                        data-index="${index}"
-                        class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
-                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
-                                  clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
+          return `
+            <div class="flex items-center mb-3">
+              <button
+                data-index="${index}"
+                class="user-select-btn w-full text-left p-4 bg-white rounded-lg shadow hover:bg-yellow-50 transition flex justify-between items-center">
+                <span class="text-lg font-bold text-gray-700">${name}</span>
+                <span class="text-sm font-semibold ${isComplete ? 'text-green-500' : 'text-gray-500'}">
+                  ${isComplete ? 'かんせい！' : progressLabel}
+                </span>
+              </button>
+              <button
+                data-index="${index}"
+                class="delete-user-btn ml-2 p-3 bg-red-100 rounded-full hover:bg-red-200 transition">
+                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
+                    clip-rule="evenodd"></path>
+                </svg>
+              </button>
+            </div>
+          `;
         }).join('');
 
-        const newCardButton = users.length < 5
-            ? `
-            <button
-                id="add-new-card-btn"
-                class="w-full mt-4 p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
-                あたらしいカードをつくる
-            </button>
-            `
-            : '';
+        const newCardButton = users.length < 5 ? `
+          <button
+            id="add-new-card-btn"
+            class="w-full mt-4 p-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
+            あたらしいカードをつくる
+          </button>
+        ` : '';
 
         app.innerHTML = `
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">
-                    どのカードをつかいますか？
-                </h1>
-                <p class="text-center text-sm text-gray-500 mb-4">
-                    カードをえらんでスタンプをためよう
-                </p>
+          <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">
+              どのカードをつかいますか？
+            </h1>
+            <p class="text-center text-sm text-gray-500 mb-4">
+              カードをえらんでスタンプをためよう
+            </p>
 
-                <div class="user-list mt-2">
-                    ${userButtons || ''}
-                </div>
-
-                ${newCardButton}
-
-                <div class="mt-6 text-center">
-                  <a
-                    href="homesta-help.html"
-                    class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 underline"
-                  >
-                    <span>つかいかた（説明書）</span>
-                  </a>
-                </div>
+            <div class="user-list mt-2">
+              ${userButtons || ''}
             </div>
+
+            ${newCardButton}
+
+            <div class="mt-6 text-center">
+              <a
+                href="homesta-help.html"
+                class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 underline">
+                <span>つかいかた（説明書）</span>
+              </a>
+            </div>
+          </div>
         `;
 
         addHomeScreenListeners();
-    }
-    
-    // 設定画面
-    function renderSetup() {
+      }
+
+      // 設定画面
+      function renderSetup() {
         isExchangeMode = false;
         const state = getCurrentState();
         if (!state) return renderHomeScreen();
 
         const isEditMode = !state.isSetup;
 
-        if (isEditMode) {
-            editBackup = JSON.parse(JSON.stringify(state));
-        } else {
-            editBackup = null;
-        }
+        if (isEditMode) editBackup = JSON.parse(JSON.stringify(state));
+        else editBackup = null;
 
         state.rewards = state.rewards.filter(r => r < state.stampCount);
         const lastIndex = state.stampCount - 1;
@@ -656,481 +706,509 @@
         const titleText = isEditMode ? 'がんばりカードを修正しよう' : 'がんばりカードをつくろう';
 
         app.innerHTML = `
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">${titleText}</h1>
-                <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
+          <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-1 text-yellow-600">${titleText}</h1>
+            <p class="text-center text-gray-500 mb-6">なまえやスタンプのかずをきめてね</p>
 
-                <div class="mb-4">
-                    <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
-                    <input
-                        type="text"
-                        id="name-input"
-                        value="${state.name}"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        placeholder="（れい）たろう">
-                </div>
-
-                <div class="mb-4">
-                    <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
-                    <input
-                        type="text"
-                        id="goal-input"
-                        value="${state.goal || ''}"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        placeholder="（れい）朝７時までにおきます">
-                </div>
-
-                <div class="mb-6">
-                    <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
-                    <div id="background-selector" class="flex gap-3 justify-center"></div>
-                </div>
-
-                <div class="mb-6">
-                    <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">
-                        スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span>
-                    </label>
-                    <input
-                        type="range"
-                        id="stamp-count-slider"
-                        min="${minStampCount}"
-                        max="30"
-                        value="${state.stampCount}"
-                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    ${
-                        isEditMode
-                            ? '<p class="mt-1 text-xs text-gray-500">※ いまより少なくすることはできません</p>'
-                            : ''
-                    }
-                </div>
-
-                <div class="mb-6">
-                    <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
-                    <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
-                </div>
-
-                <button
-                    id="create-card-btn"
-                    class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
-                    ${primaryBtnLabel}
-                </button>
-
-                ${
-                    isEditMode
-                        ? `
-                    <div class="mt-6 flex justify-between">
-                        <button id="back-to-card-btn" class="text-sm text-gray-600 hover:underline">
-                            修正をしないでもどる
-                        </button>
-                        <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
-                            このカードをけす
-                        </button>
-                    </div>
-                    `
-                        : `
-                    <div class="mt-6 flex justify-between">
-                        <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">
-                            ユーザーきりかえ
-                        </button>
-                        <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
-                            このカードをけす
-                        </button>
-                    </div>
-                    `
-                }
+            <div class="mb-4">
+              <label for="name-input" class="block text-gray-700 font-bold mb-2">なまえ</label>
+              <input
+                type="text"
+                id="name-input"
+                value="${state.name}"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                placeholder="（れい）たろう">
             </div>
+
+            <div class="mb-4">
+              <label for="goal-input" class="block text-gray-700 font-bold mb-2">もくひょう</label>
+              <input
+                type="text"
+                id="goal-input"
+                value="${state.goal || ''}"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                placeholder="（れい）朝７時までにおきます">
+            </div>
+
+            <div class="mb-6">
+              <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
+              <div id="background-selector" class="flex gap-3 justify-center"></div>
+            </div>
+
+            <div class="mb-6">
+              <label for="stamp-count-slider" class="block text-gray-700 font-bold mb-2">
+                スタンプのかず: <span id="stamp-count-label">${state.stampCount}</span>
+              </label>
+              <input
+                type="range"
+                id="stamp-count-slider"
+                min="${minStampCount}"
+                max="30"
+                value="${state.stampCount}"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+              ${isEditMode ? '<p class="mt-1 text-xs text-gray-500">※ いまより少なくすることはできません</p>' : ''}
+            </div>
+
+            <div class="mb-6">
+              <p class="block text-gray-700 font-bold mb-2">ごほうびをいれる</p>
+              <div id="reward-selector" class="grid grid-cols-5 gap-2"></div>
+            </div>
+
+            <button
+              id="create-card-btn"
+              class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
+              ${primaryBtnLabel}
+            </button>
+
+            ${
+              isEditMode
+                ? `
+                  <div class="mt-6 flex justify-between">
+                    <button id="back-to-card-btn" class="text-sm text-gray-600 hover:underline">
+                      修正をしないでもどる
+                    </button>
+                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                      このカードをけす
+                    </button>
+                  </div>
+                `
+                : `
+                  <div class="mt-6 flex justify-between">
+                    <button id="back-to-home-btn" class="text-sm text-gray-600 hover:underline">
+                      ユーザーきりかえ
+                    </button>
+                    <button id="delete-card-btn" class="text-sm text-red-500 hover:underline">
+                      このカードをけす
+                    </button>
+                  </div>
+                `
+            }
+          </div>
         `;
 
         renderRewardSelector();
         renderBackgroundSelector();
         addSetupListeners();
-    }
+      }
 
-    function renderBackgroundSelector() {
+      function renderBackgroundSelector() {
         const state = getCurrentState();
         if (!state) return;
         const selector = document.getElementById('background-selector');
         if (!selector) return;
         const backgrounds = [
-            { value: '#fff9e6', name: 'きいろ' },
-            { value: '#e0f2fe', name: 'みずいろ' },
-            { value: '#fce7f3', name: 'ぴんく' },
-            { value: '#f0fdf4', name: 'みどり' }
+          { value: '#fff9e6', name: 'きいろ' },
+          { value: '#e0f2fe', name: 'みずいろ' },
+          { value: '#fce7f3', name: 'ぴんく' },
+          { value: '#f0fdf4', name: 'みどり' }
         ];
         selector.innerHTML = backgrounds.map(bg => {
-            const isSelected = state.cardBackground === bg.value;
-            return `
-                <div data-bg="${bg.value}" class="cursor-pointer text-center">
-                    <div class="w-12 h-12 rounded-full border-4 ${isSelected ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-white'}" style="background-color: ${bg.value};"></div>
-                    <span class="text-xs font-semibold text-gray-600">${bg.name}</span>
-                </div>
-            `;
+          const isSelected = state.cardBackground === bg.value;
+          return `
+            <div data-bg="${bg.value}" class="cursor-pointer text-center">
+              <div class="w-12 h-12 rounded-full border-4 ${isSelected ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-white'}"
+                style="background-color: ${bg.value};"></div>
+              <span class="text-xs font-semibold text-gray-600">${bg.name}</span>
+            </div>
+          `;
         }).join('');
-    }
-    
-    function renderRewardSelector() {
+      }
+
+      function renderRewardSelector() {
         const state = getCurrentState();
         if (!state) return;
         const selector = document.getElementById('reward-selector');
         selector.innerHTML = '';
         const lastIndex = state.stampCount - 1;
         for (let i = 0; i < state.stampCount; i++) {
-            const isReward = state.rewards.includes(i);
-            const isLast = (i === lastIndex);
-            const slot = document.createElement('div');
-            let classes = 'aspect-square rounded-full flex justify-center items-center border-2 text-sm font-bold ';
-            if (isLast) classes += 'bg-orange-400 border-orange-500 text-white cursor-not-allowed';
-            else if (isReward) classes += 'bg-orange-400 border-orange-500 text-white cursor-pointer';
-            else classes += 'bg-gray-100 border-gray-300 cursor-pointer';
-            slot.className = classes;
-            slot.dataset.index = i;
-            slot.innerHTML = isReward ? '🎁' : i + 1;
-            selector.appendChild(slot);
+          const isReward = state.rewards.includes(i);
+          const isLast = (i === lastIndex);
+          const slot = document.createElement('div');
+          let classes = 'aspect-square rounded-full flex justify-center items-center border-2 text-sm font-bold ';
+          if (isLast) classes += 'bg-orange-400 border-orange-500 text-white cursor-not-allowed';
+          else if (isReward) classes += 'bg-orange-400 border-orange-500 text-white cursor-pointer';
+          else classes += 'bg-gray-100 border-gray-300 cursor-pointer';
+          slot.className = classes;
+          slot.dataset.index = i;
+          slot.innerHTML = isReward ? '🎁' : i + 1;
+          selector.appendChild(slot);
         }
-    }
+      }
 
-    // カード画面
-    function renderCard() {
+      // カード画面
+      function renderCard() {
         const state = getCurrentState();
         if (!state) return renderHomeScreen();
         state.isSetup = false;
-        
+
+        const cardNo = state.cardNumber || 1;
+
+        // 改行反映（キャプチャ用表示）
+        const memoHtml = (state.memo || '').replace(/\n/g, '<br>');
+        const commentHtml = (state.comment || '').replace(/\n/g, '<br>');
+
         app.innerHTML = `
-  <div id="capture-area"
-       class="rounded-2xl p-4"
-       style="background-color: ${state.cardBackground};">
-    <div class="text-center pt-4 mb-4">
-      <h1 class="text-2xl font-bold text-yellow-800">${state.name}がんばりカード</h1>
-      ${state.goal ? `<p class="text-lg font-semibold text-gray-600 mt-2">「${state.goal}」</p>` : ''}
-    </div>
-    <div class="stamp-card"></div>
-
-                <!-- メモ＆コメント（画像にも写る） -->
-                <div class="px-4 pb-4 mt-4 space-y-3">
-                  <div>
-                    <label for="memo-input" class="block text-sm font-bold text-gray-700 mb-1">
-                      メモ
-                    </label>
-                    <textarea
-                      id="memo-input"
-                      class="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white/80"
-                      rows="2"
-                      placeholder="その日のようすや、がんばったポイントをメモできます。"
-                    >${state.memo || ''}</textarea>
-                  </div>
-
-                  <div>
-                    <label for="comment-input" class="block text-sm font-bold text-gray-700 mb-1">
-                      ${state.name || 'お子さん'}へのコメント
-                    </label>
-                    <textarea
-                      id="comment-input"
-                      class="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white/80"
-                      rows="2"
-                      placeholder="たとえば「○○してくれて助かったよ」「チャレンジしたことがすごいね」など、ほめメッセージを書くと効果アップ！"
-                    >${state.comment || ''}</textarea>
-                  </div>
-                </div>
+          <div id="capture-area" class="rounded-2xl p-4" style="background-color: ${state.cardBackground};">
+            <div class="text-center pt-4 mb-4">
+              <h1 class="text-2xl font-bold text-yellow-800">
+                ${state.name} がんばりカード　${cardNo}枚目 <span aria-hidden="true">🌟</span>
+              </h1>
+              ${state.goal ? `<p class="text-lg font-semibold text-gray-600 mt-2">「${state.goal}」</p>` : ''}
             </div>
-            <div id="action-buttons-container"></div>
+
+            <div class="stamp-card"></div>
+
+            <!-- メモ＆コメント（画像にも写る） -->
+            <div class="px-4 pb-4 mt-4 space-y-4">
+
+              <div class="sticker">
+                <div class="sticker-label"><span class="dot"></span>メモ</div>
+
+                <!-- 通常時：入力 -->
+                <textarea
+                  id="memo-input"
+                  class="sticker-textarea"
+                  rows="3"
+                  placeholder="その日のようすや、がんばったポイントをメモできます。"
+                >${state.memo || ''}</textarea>
+
+                <!-- キャプチャ時：表示（3行まで） -->
+                <div class="capture-only hidden">
+                  <div class="capture-text clamp-3">${memoHtml || '（未記入）'}</div>
+                </div>
+              </div>
+
+              <div class="sticker">
+                <div class="sticker-label"><span class="dot"></span>${state.name || 'お子さん'}へのコメント</div>
+
+                <!-- 通常時：入力 -->
+                <textarea
+                  id="comment-input"
+                  class="sticker-textarea"
+                  rows="3"
+                  placeholder="たとえば「○○してくれて助かったよ」「チャレンジしたことがすごいね」など、ほめメッセージを書くと効果アップ！"
+                >${state.comment || ''}</textarea>
+
+                <!-- キャプチャ時：表示（3行まで） -->
+                <div class="capture-only hidden">
+                  <div class="capture-text clamp-3">${commentHtml || '（未記入）'}</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div id="action-buttons-container"></div>
         `;
-        
+
         const cardContainer = app.querySelector('.stamp-card');
         for (let i = 0; i < state.stampCount; i++) {
-            const slot = document.createElement('div');
-            slot.className = 'stamp-slot';
-            slot.dataset.index = i;
-            let content = `<span class="absolute text-gray-400 font-bold text-xl">${i + 1}</span>`;
-            if (state.rewards.includes(i)) {
-                slot.classList.add('is-reward');
-                content += '<span class="reward-icon">🎁</span>';
-            }
-            
-            const exchanged = state.exchanges.find(e => e.index === i);
-            const stamped = state.stamps.find(s => s.index === i);
-            
-            if (exchanged) {
-                content += `
-                    <div class="exchanged-slot-content">
-                        <svg class="exchanged-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                        <span class="exchanged-date">${exchanged.date}</span>
-                    </div>
-                `;
-            } else if (stamped) {
-                content += `<img src="${stamped.image}" class="stamp-image" alt="スタンプ">`;
-                content += `<span class="stamp-date">${stamped.date}</span>`;
-            }
+          const slot = document.createElement('div');
+          slot.className = 'stamp-slot';
+          slot.dataset.index = i;
+          let content = `<span class="absolute text-gray-400 font-bold text-xl">${i + 1}</span>`;
+          if (state.rewards.includes(i)) {
+            slot.classList.add('is-reward');
+            content += '<span class="reward-icon">🎁</span>';
+          }
 
-            slot.innerHTML = content;
-            cardContainer.appendChild(slot);
+          const exchanged = state.exchanges.find(e => e.index === i);
+          const stamped = state.stamps.find(s => s.index === i);
+
+          if (exchanged) {
+            content += `
+              <div class="exchanged-slot-content">
+                <svg class="exchanged-icon" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"></path>
+                </svg>
+                <span class="exchanged-date">${exchanged.date}</span>
+              </div>
+            `;
+          } else if (stamped) {
+            content += `<img src="${stamped.image}" class="stamp-image" alt="スタンプ">`;
+            content += `<span class="stamp-date">${stamped.date}</span>`;
+          }
+
+          slot.innerHTML = content;
+          cardContainer.appendChild(slot);
         }
 
         const filledSlots = state.stamps.length + state.exchanges.length;
         const isComplete = filledSlots === state.stampCount && state.stampCount > 0;
-        
+
         let actionHTML = '';
         if (isComplete) {
-            actionHTML = `
-                <div class="mt-6 flex justify-center">
-                    <button id="action-btn" data-action="save" class="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition shadow-lg">頑張りを写真で納める</button>
-                </div>
-            `;
+          actionHTML = `
+            <div class="mt-6 flex justify-center">
+              <button id="action-btn" data-action="save"
+                class="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition shadow-lg">
+                頑張りを写真で納める
+              </button>
+            </div>
+          `;
         } else {
-            const exchangeBtnClass = isExchangeMode ? 'bg-red-500' : 'bg-purple-500';
-            const exchangeBtnHover = isExchangeMode ? 'hover:bg-red-600' : 'hover:bg-purple-600';
-            const exchangeBtnText = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
-            actionHTML = `
-                <div class="mt-6 flex flex-col items-center gap-4">
-                    <button id="exchange-btn" class="w-full max-w-xs text-sm ${exchangeBtnClass} text-white font-bold py-3 px-5 rounded-full ${exchangeBtnHover} transition">${exchangeBtnText}</button>
-                    <div class="flex justify-center gap-4">
-                        <button id="back-to-home-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition">ユーザーきりかえ</button>
-                        <button id="go-to-setup-btn" class="bg-yellow-200 text-yellow-800 font-bold py-2 px-5 rounded-full hover:bg-yellow-300 transition">
-                            今のカードを修正
-                        </button>
-                    </div>
-                </div>
-            `;
+          const exchangeBtnClass = isExchangeMode ? 'bg-red-500' : 'bg-purple-500';
+          const exchangeBtnHover = isExchangeMode ? 'hover:bg-red-600' : 'hover:bg-purple-600';
+          const exchangeBtnText = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
+          actionHTML = `
+            <div class="mt-6 flex flex-col items-center gap-4">
+              <button id="exchange-btn"
+                class="w-full max-w-xs text-sm ${exchangeBtnClass} text-white font-bold py-3 px-5 rounded-full ${exchangeBtnHover} transition">
+                ${exchangeBtnText}
+              </button>
+              <div class="flex justify-center gap-4">
+                <button id="back-to-home-btn"
+                  class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition">
+                  ユーザーきりかえ
+                </button>
+                <button id="go-to-setup-btn"
+                  class="bg-yellow-200 text-yellow-800 font-bold py-2 px-5 rounded-full hover:bg-yellow-300 transition">
+                  今のカードを修正
+                </button>
+              </div>
+            </div>
+          `;
         }
         document.getElementById('action-buttons-container').innerHTML = actionHTML;
 
         addCardListeners();
-    }
-    
-    function updateStockedStampsInModal() {
+      }
+
+      function updateStockedStampsInModal() {
         const state = getCurrentState();
         if (!state) return;
 
         for (let i = 0; i < 3; i++) {
-            const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
-            const deleteBtn = stockedStampDiv.querySelector('.stock-delete-btn');
+          const stockedStampDiv = document.getElementById(`stocked-stamp-${i}`);
+          const deleteBtn = stockedStampDiv.querySelector('.stock-delete-btn');
 
-            stockedStampDiv.querySelectorAll('img, span').forEach(el => el.remove());
+          stockedStampDiv.querySelectorAll('img, span').forEach(el => el.remove());
 
-            if (state.stockedStamps[i]) {
-                const imgEl = document.createElement('img');
-                imgEl.src = state.stockedStamps[i];
-                imgEl.alt = 'ストックスタンプ';
-                imgEl.className = 'stamp-image';
+          if (state.stockedStamps[i]) {
+            const imgEl = document.createElement('img');
+            imgEl.src = state.stockedStamps[i];
+            imgEl.alt = 'ストックスタンプ';
+            imgEl.className = 'stamp-image';
 
-                stockedStampDiv.appendChild(imgEl);
-                stockedStampDiv.classList.remove('bg-gray-100');
-                stockedStampDiv.classList.add('border-2', 'border-gray-300');
+            stockedStampDiv.appendChild(imgEl);
+            stockedStampDiv.classList.remove('bg-gray-100');
+            stockedStampDiv.classList.add('border-2', 'border-gray-300');
 
-                stockedStampDiv.onclick = (e) => {
-                    if (e.target.classList.contains('stock-delete-btn')) return;
-                    applyStamp(state.stockedStamps[i]);
-                };
+            stockedStampDiv.onclick = (e) => {
+              if (e.target.classList.contains('stock-delete-btn')) return;
+              applyStamp(state.stockedStamps[i]);
+            };
 
-                deleteBtn.classList.remove('hidden');
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    state.stockedStamps.splice(i, 1);
-                    saveAppData();
-                    updateStockedStampsInModal();
-                };
+            deleteBtn.classList.remove('hidden');
+            deleteBtn.onclick = (e) => {
+              e.stopPropagation();
+              state.stockedStamps.splice(i, 1);
+              saveAppData();
+              updateStockedStampsInModal();
+            };
 
-            } else {
-                const plusSpan = document.createElement('span');
-                plusSpan.className = 'text-gray-400 text-lg';
-                plusSpan.textContent = '+';
-                stockedStampDiv.appendChild(plusSpan);
+          } else {
+            const plusSpan = document.createElement('span');
+            plusSpan.className = 'text-gray-400 text-lg';
+            plusSpan.textContent = '+';
+            stockedStampDiv.appendChild(plusSpan);
 
-                stockedStampDiv.classList.add('bg-gray-100');
-                stockedStampDiv.classList.remove('border-2', 'border-gray-300');
+            stockedStampDiv.classList.add('bg-gray-100');
+            stockedStampDiv.classList.remove('border-2', 'border-gray-300');
 
-                deleteBtn.classList.add('hidden');
-                deleteBtn.onclick = null;
-                stockedStampDiv.onclick = null;
-            }
+            deleteBtn.classList.add('hidden');
+            deleteBtn.onclick = null;
+            stockedStampDiv.onclick = null;
+          }
         }
-    }
-    
-    function addHomeScreenListeners() {
+      }
+
+      function addHomeScreenListeners() {
         const addNewCardBtn = document.getElementById('add-new-card-btn');
 
         if (addNewCardBtn) {
-            addNewCardBtn.addEventListener('click', () => {
-                const newUserState = {
-                    name: '',
-                    goal: '',
-                    stampCount: 10,
-                    rewards: [],
-                    stamps: [],
-                    exchanges: [],
-                    isSetup: true,
-                    stampingIndex: null,
-                    stockedStamps: [],
-                    cardBackground: '#fff9e6',
-                    memo: '',
-                    comment: ''
-                };
-                appData.users.push(newUserState);
-                appData.currentUserIndex = appData.users.length - 1;
-                saveAppData();
-                renderSetup();
-            });
+          addNewCardBtn.addEventListener('click', () => {
+            const newUserState = {
+              name: '',
+              goal: '',
+              stampCount: 10,
+              rewards: [],
+              stamps: [],
+              exchanges: [],
+              isSetup: true,
+              stampingIndex: null,
+              stockedStamps: [],
+              cardBackground: '#fff9e6',
+              memo: '',
+              comment: '',
+              cardNumber: 1 // ★追加
+            };
+            appData.users.push(newUserState);
+            appData.currentUserIndex = appData.users.length - 1;
+            saveAppData();
+            renderSetup();
+          });
         }
 
         document.querySelectorAll('.user-select-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = parseInt(e.currentTarget.dataset.index, 10);
-                appData.currentUserIndex = index;
+          btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.dataset.index, 10);
+            appData.currentUserIndex = index;
 
-                const state = getCurrentState();
-                if (!state) {
-                    renderHomeScreen();
-                    return;
-                }
+            const state = getCurrentState();
+            if (!state) {
+              renderHomeScreen();
+              return;
+            }
 
-                if (state.isSetup || !state.name) {
-                    renderSetup();
-                } else {
-                    renderCard();
-                }
-            });
+            if (state.isSetup || !state.name) renderSetup();
+            else renderCard();
+          });
         });
 
         document.querySelectorAll('.delete-user-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const index = parseInt(e.currentTarget.dataset.index, 10);
-                deleteIndex = index;
-                deleteMode = 'user';
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = parseInt(e.currentTarget.dataset.index, 10);
+            deleteIndex = index;
+            deleteMode = 'user';
 
-                const userToDelete = appData.users[index];
-                const name = userToDelete.name || `カード ${index + 1}`;
+            const userToDelete = appData.users[index];
+            const name = userToDelete.name || `カード ${index + 1}`;
 
-                const deleteModal = document.getElementById('delete-confirm-modal');
-                const deleteTitle = document.getElementById('delete-confirm-title');
-                deleteTitle.textContent = `「${name}」を削除しますか？`;
-                deleteModal.classList.add('is-visible');
-            });
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const deleteTitle = document.getElementById('delete-confirm-title');
+            deleteTitle.textContent = `「${name}」を削除しますか？`;
+            deleteModal.classList.add('is-visible');
+          });
         });
-    }
+      }
 
-    function addSetupListeners() {
+      function addSetupListeners() {
         const state = getCurrentState();
         if (!state) return;
 
         const isEditMode = !state.isSetup;
 
         document.getElementById('name-input').addEventListener('input', (e) => {
-            state.name = e.target.value;
+          state.name = e.target.value;
         });
 
         document.getElementById('goal-input').addEventListener('input', (e) => {
-            state.goal = e.target.value;
+          state.goal = e.target.value;
         });
 
         document.getElementById('stamp-count-slider').addEventListener('input', (e) => {
-            const newCount = parseInt(e.target.value, 10);
-            state.stampCount = newCount;
-            document.getElementById('stamp-count-label').textContent = state.stampCount;
+          const newCount = parseInt(e.target.value, 10);
+          state.stampCount = newCount;
+          document.getElementById('stamp-count-label').textContent = state.stampCount;
 
-            state.rewards = state.rewards.filter(r => r < state.stampCount);
-            const lastIndex = state.stampCount - 1;
-            if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
-            renderRewardSelector();
+          state.rewards = state.rewards.filter(r => r < state.stampCount);
+          const lastIndex = state.stampCount - 1;
+          if (!state.rewards.includes(lastIndex)) state.rewards.push(lastIndex);
+          renderRewardSelector();
         });
 
         document.getElementById('reward-selector').addEventListener('click', (e) => {
-            const target = e.target.closest('div[data-index]');
-            if (!target) return;
+          const target = e.target.closest('div[data-index]');
+          if (!target) return;
 
-            const index = parseInt(target.dataset.index, 10);
-            if (index === state.stampCount - 1) return;
+          const index = parseInt(target.dataset.index, 10);
+          if (index === state.stampCount - 1) return;
 
-            if (state.rewards.includes(index)) {
-                state.rewards = state.rewards.filter(r => r !== index);
-            } else {
-                state.rewards.push(index);
-            }
-            renderRewardSelector();
+          if (state.rewards.includes(index)) {
+            state.rewards = state.rewards.filter(r => r !== index);
+          } else {
+            state.rewards.push(index);
+          }
+          renderRewardSelector();
         });
 
         document.getElementById('background-selector').addEventListener('click', (e) => {
-            const target = e.target.closest('div[data-bg]');
-            if (!target) return;
-            state.cardBackground = target.dataset.bg;
-            renderBackgroundSelector();
+          const target = e.target.closest('div[data-bg]');
+          if (!target) return;
+          state.cardBackground = target.dataset.bg;
+          renderBackgroundSelector();
         });
 
         document.getElementById('create-card-btn').addEventListener('click', () => {
-            if (!state.name) {
-                alert('なまえをいれてね！');
-                return;
-            }
+          if (!state.name) {
+            alert('なまえをいれてね！');
+            return;
+          }
 
-            if (!isEditMode) {
-                state.stamps = [];
-                state.exchanges = [];
-                state.memo = '';
-                state.comment = '';
-            }
+          if (!isEditMode) {
+            state.stamps = [];
+            state.exchanges = [];
+            state.memo = '';
+            state.comment = '';
+            if (typeof state.cardNumber === 'undefined') state.cardNumber = 1;
+          }
 
-            state.isSetup = false;
-            saveAppData();
-            renderCard();
+          state.isSetup = false;
+          saveAppData();
+          renderCard();
         });
 
         if (isEditMode) {
-            const backToCardBtn = document.getElementById('back-to-card-btn');
-            if (backToCardBtn) {
-                backToCardBtn.addEventListener('click', () => {
-                    if (editBackup) {
-                        appData.users[appData.currentUserIndex] = editBackup;
-                    }
-                    saveAppData();
-                    renderCard();
-                });
-            }
+          const backToCardBtn = document.getElementById('back-to-card-btn');
+          if (backToCardBtn) {
+            backToCardBtn.addEventListener('click', () => {
+              if (editBackup) {
+                appData.users[appData.currentUserIndex] = editBackup;
+              }
+              saveAppData();
+              renderCard();
+            });
+          }
         } else {
-            const backToHomeBtn = document.getElementById('back-to-home-btn');
-            if (backToHomeBtn) {
-                backToHomeBtn.addEventListener('click', renderHomeScreen);
-            }
+          const backToHomeBtn = document.getElementById('back-to-home-btn');
+          if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
         }
 
         const deleteBtn = document.getElementById('delete-card-btn');
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
-                deleteIndex = appData.currentUserIndex;
-                deleteMode = 'user';
-                const currentName = state.name || `カード ${deleteIndex + 1}`;
+          deleteBtn.addEventListener('click', () => {
+            deleteIndex = appData.currentUserIndex;
+            deleteMode = 'user';
+            const currentName = state.name || `カード ${deleteIndex + 1}`;
 
-                const deleteModal = document.getElementById('delete-confirm-modal');
-                const deleteTitle = document.getElementById('delete-confirm-title');
-                deleteTitle.textContent = `「${currentName}」を削除しますか？`;
-                deleteModal.classList.add('is-visible');
-            });
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const deleteTitle = document.getElementById('delete-confirm-title');
+            deleteTitle.textContent = `「${currentName}」を削除しますか？`;
+            deleteModal.classList.add('is-visible');
+          });
         }
-    }
-    
-    function addCardListeners() {
+      }
+
+      function addCardListeners() {
         const state = getCurrentState();
         if (!state) return;
-        
-        app.querySelector('.stamp-card').addEventListener('click', (e) => {
-            const target = e.target.closest('.stamp-slot');
-            if (!target) return;
-            
-            const targetIndex = parseInt(target.dataset.index, 10);
-            const isStamped = state.stamps.some(s => s.index === targetIndex);
-            const isExchanged = state.exchanges.some(e => e.index === targetIndex);
 
-            if (isExchangeMode) {
-                if (isExchanged) return; 
-                applyExchange(targetIndex);
-            } else {
-                if (isStamped || isExchanged) return; 
-                state.stampingIndex = targetIndex;
-                updateStockedStampsInModal();
-                stampModal.classList.add('is-visible');
-            }
+        app.querySelector('.stamp-card').addEventListener('click', (e) => {
+          const target = e.target.closest('.stamp-slot');
+          if (!target) return;
+
+          const targetIndex = parseInt(target.dataset.index, 10);
+          const isStamped = state.stamps.some(s => s.index === targetIndex);
+          const isExchanged = state.exchanges.some(e => e.index === targetIndex);
+
+          if (isExchangeMode) {
+            if (isExchanged) return;
+            applyExchange(targetIndex);
+          } else {
+            if (isStamped || isExchanged) return;
+            state.stampingIndex = targetIndex;
+            updateStockedStampsInModal();
+            stampModal.classList.add('is-visible');
+          }
         });
 
         const backToHomeBtn = document.getElementById('back-to-home-btn');
         if (backToHomeBtn) backToHomeBtn.addEventListener('click', renderHomeScreen);
-            
+
         const goToSetupBtn = document.getElementById('go-to-setup-btn');
         if (goToSetupBtn) goToSetupBtn.addEventListener('click', renderSetup);
 
@@ -1139,14 +1217,14 @@
 
         const exchangeBtn = document.getElementById('exchange-btn');
         if (exchangeBtn) {
-            exchangeBtn.addEventListener('click', () => {
-                isExchangeMode = !isExchangeMode;
-                exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
-                exchangeBtn.classList.toggle('bg-purple-500');
-                exchangeBtn.classList.toggle('hover:bg-purple-600');
-                exchangeBtn.classList.toggle('bg-red-500');
-                exchangeBtn.classList.toggle('hover:bg-red-600');
-            });
+          exchangeBtn.addEventListener('click', () => {
+            isExchangeMode = !isExchangeMode;
+            exchangeBtn.textContent = isExchangeMode ? '交換するマスを選んでね (キャンセル)' : 'ポイント交換';
+            exchangeBtn.classList.toggle('bg-purple-500');
+            exchangeBtn.classList.toggle('hover:bg-purple-600');
+            exchangeBtn.classList.toggle('bg-red-500');
+            exchangeBtn.classList.toggle('hover:bg-red-600');
+          });
         }
 
         // メモ・コメント入力の保存
@@ -1154,85 +1232,82 @@
         const commentInput = document.getElementById('comment-input');
 
         if (memoInput) {
-            memoInput.addEventListener('input', (e) => {
-                state.memo = e.target.value;
-                saveAppData();
-            });
+          memoInput.addEventListener('input', (e) => {
+            state.memo = e.target.value;
+            saveAppData();
+          });
         }
         if (commentInput) {
-            commentInput.addEventListener('input', (e) => {
-                state.comment = e.target.value;
-                saveAppData();
-            });
+          commentInput.addEventListener('input', (e) => {
+            state.comment = e.target.value;
+            saveAppData();
+          });
         }
 
         // スタンプ長押しで削除
         const slots = app.querySelectorAll('.stamp-slot');
-
         slots.forEach(slot => {
-            let pressTimer = null;
+          let pressTimer = null;
 
-            const startPress = (event) => {
-                const idx = parseInt(slot.dataset.index, 10);
-                const isStamped = state.stamps.some(s => s.index === idx);
-                const isExchanged = state.exchanges.some(e => e.index === idx);
+          const startPress = () => {
+            const idx = parseInt(slot.dataset.index, 10);
+            const isStamped = state.stamps.some(s => s.index === idx);
+            const isExchanged = state.exchanges.some(e => e.index === idx);
 
-                if (!isStamped || isExchanged) return;
+            if (!isStamped || isExchanged) return;
 
-                pressTimer = setTimeout(() => {
-                    deleteIndex = idx;
-                    deleteMode = 'stamp';
+            pressTimer = setTimeout(() => {
+              deleteIndex = idx;
+              deleteMode = 'stamp';
 
-                    const deleteModal = document.getElementById('delete-confirm-modal');
-                    const deleteTitle = document.getElementById('delete-confirm-title');
-                    deleteTitle.textContent = `${idx + 1}ばんのスタンプを消しますか？`;
-                    deleteModal.classList.add('is-visible');
-                }, 600);
-            };
+              const deleteModal = document.getElementById('delete-confirm-modal');
+              const deleteTitle = document.getElementById('delete-confirm-title');
+              deleteTitle.textContent = `${idx + 1}ばんのスタンプを消しますか？`;
+              deleteModal.classList.add('is-visible');
+            }, 600);
+          };
 
-            const cancelPress = () => {
-                if (pressTimer !== null) {
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
-                }
-            };
+          const cancelPress = () => {
+            if (pressTimer !== null) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+            }
+          };
 
-            slot.addEventListener('mousedown', startPress);
-            slot.addEventListener('mouseup', cancelPress);
-            slot.addEventListener('mouseleave', cancelPress);
+          slot.addEventListener('mousedown', startPress);
+          slot.addEventListener('mouseup', cancelPress);
+          slot.addEventListener('mouseleave', cancelPress);
 
-            slot.addEventListener('touchstart', startPress);
-            slot.addEventListener('touchend', cancelPress);
-            slot.addEventListener('touchcancel', cancelPress);
+          slot.addEventListener('touchstart', startPress);
+          slot.addEventListener('touchend', cancelPress);
+          slot.addEventListener('touchcancel', cancelPress);
         });
-    }
+      }
 
-    function applyExchange(targetIndex) {
+      function applyExchange(targetIndex) {
         const state = getCurrentState();
         if (!state) return;
-        
+
         state.stamps = state.stamps.filter(s => s.index !== targetIndex);
         state.exchanges = state.exchanges.filter(e => e.index !== targetIndex);
 
         const now = new Date();
         const formattedDate = `${now.getMonth() + 1}/${now.getDate()}`;
-        
+
         state.exchanges.push({ index: targetIndex, date: formattedDate });
-        
+
         isExchangeMode = false;
         renderCard();
         saveAppData();
 
-        if (state.rewards.includes(targetIndex)) {
-            showCelebration();
-        }
-    }
+        if (state.rewards.includes(targetIndex)) showCelebration();
+      }
 
-    async function applyStamp(imageSrc) {
+      async function applyStamp(imageSrc) {
         const state = getCurrentState();
         if (!state || state.stampingIndex === null) return;
         const targetIndex = state.stampingIndex;
-        
+
         animatedStampImage.src = imageSrc;
         stampOverlay.classList.add('is-visible');
         const targetSlot = app.querySelector(`.stamp-slot[data-index="${targetIndex}"]`);
@@ -1242,14 +1317,14 @@
         await new Promise(r => setTimeout(r, 50));
         animatedStampImage.classList.add('animate-in');
         await new Promise(r => setTimeout(r, 300));
-        
+
         const now = new Date();
         const formattedDate = `${now.getMonth() + 1}/${now.getDate()}`;
         state.stamps.push({ index: targetIndex, image: imageSrc, date: formattedDate });
         state.stampingIndex = null;
-        
+
         renderCard();
-        
+
         animatedStampImage.classList.remove('animate-in');
         animatedStampImage.classList.add('animate-out');
         await new Promise(r => setTimeout(r, 300));
@@ -1258,86 +1333,106 @@
         if (state.rewards.includes(targetIndex)) showCelebration();
         saveAppData();
         stampModal.classList.remove('is-visible');
-    }
+      }
 
-    async function handleCardCompletion() {
+      async function handleCardCompletion() {
         const state = getCurrentState();
         if (!state) return;
         const actionBtn = document.getElementById('action-btn');
         if (!actionBtn) return;
-        
+
         const action = actionBtn.dataset.action;
-        
+
         if (action === 'save') {
-            const captureArea = document.getElementById('capture-area');
-            try {
-                document.body.style.overflow = 'hidden';
-                window.scrollTo(0, 0);
+          const captureArea = document.getElementById('capture-area');
+          try {
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
 
-                const canvas = await html2canvas(captureArea, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: state.cardBackground
-                });
-                
-                const imageURL = canvas.toDataURL("image/png");
-                const downloadLink = document.createElement('a');
-                const fileName = `${state.name}_がんばりカード_${new Date().toISOString().split('T')[0]}.png`;
-                downloadLink.href = imageURL;
-                downloadLink.download = fileName;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+            // ★キャプチャ用UIに切り替え（textarea非表示＆表示用テキストを出す）
+            captureArea.classList.add('capture-mode');
+            captureArea.querySelectorAll('.capture-only').forEach(el => el.classList.remove('hidden'));
 
-                document.body.style.overflow = 'auto';
+            const canvas = await html2canvas(captureArea, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: state.cardBackground
+            });
 
-                actionBtn.textContent = '次のカードに進む';
-                actionBtn.dataset.action = 'next';
-                actionBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
-                actionBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            // ★必ず元に戻す
+            captureArea.classList.remove('capture-mode');
+            captureArea.querySelectorAll('.capture-only').forEach(el => el.classList.add('hidden'));
 
-            } catch (err) {
-                console.error('画像キャプチャに失敗しました:', err);
-                document.body.style.overflow = 'auto';
+            const imageURL = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement('a');
+            const fileName = `${state.name}_がんばりカード_${new Date().toISOString().split('T')[0]}.png`;
+            downloadLink.href = imageURL;
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            document.body.style.overflow = 'auto';
+
+            actionBtn.textContent = '次のカードに進む';
+            actionBtn.dataset.action = 'next';
+            actionBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            actionBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+
+          } catch (err) {
+            console.error('画像キャプチャに失敗しました:', err);
+
+            // ★失敗時も元に戻す（ここ重要）
+            const captureArea2 = document.getElementById('capture-area');
+            if (captureArea2) {
+              captureArea2.classList.remove('capture-mode');
+              captureArea2.querySelectorAll('.capture-only').forEach(el => el.classList.add('hidden'));
             }
-            
+
+            document.body.style.overflow = 'auto';
+          }
+
         } else if (action === 'next') {
-            state.stamps = [];
-            state.exchanges = [];
-            state.memo = '';
-            state.comment = '';
-            state.isSetup = true;
-            saveAppData();
-            renderSetup();
+          state.stamps = [];
+          state.exchanges = [];
+          state.memo = '';
+          state.comment = '';
+          state.isSetup = true;
+
+          // ★何枚目を進める
+          state.cardNumber = (state.cardNumber || 1) + 1;
+
+          saveAppData();
+          renderSetup();
         }
-    }
-    
-    function createStampSVG(type) {
+      }
+
+      function createStampSVG(type) {
         let svgContent = '';
-        switch(type) {
-            case 'star':
-                svgContent =
-                    '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path fill="#FBBF24" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>' +
-                    '</svg>';
-                break;
-            case 'heart':
-                svgContent =
-                    '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path fill-rule="evenodd" fill="#60A5FA" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>' +
-                    '</svg>';
-                break;
-            case 'thumb':
-                svgContent =
-                    '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path fill="#4ADE80" d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path>' +
-                    '</svg>';
-                break;
+        switch (type) {
+          case 'star':
+            svgContent =
+              '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
+              '<path fill="#FBBF24" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>' +
+              '</svg>';
+            break;
+          case 'heart':
+            svgContent =
+              '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
+              '<path fill-rule="evenodd" fill="#60A5FA" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>' +
+              '</svg>';
+            break;
+          case 'thumb':
+            svgContent =
+              '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
+              '<path fill="#4ADE80" d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a2 2 0 00-.8 1.4z"></path>' +
+              '</svg>';
+            break;
         }
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgContent);
-    }
+      }
 
-    function showCelebration() {
+      function showCelebration() {
         const state = getCurrentState();
         if (!state) return;
 
@@ -1346,126 +1441,123 @@
         celebrationScreen.classList.add('is-visible');
 
         confettiInstance({
-            particleCount: 120,
-            spread: 80,
-            origin: { y: 0.6 }
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
         });
-    }
+      }
 
-    function init() {
+      function init() {
         const deleteModal = document.getElementById('delete-confirm-modal');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
         cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.remove('is-visible');
-            deleteIndex = null;
-            deleteMode = null;
+          deleteModal.classList.remove('is-visible');
+          deleteIndex = null;
+          deleteMode = null;
         });
 
         confirmDeleteBtn.addEventListener('click', () => {
-            if (deleteIndex === null) return;
+          if (deleteIndex === null) return;
 
-            if (deleteMode === 'user') {
-                appData.users.splice(deleteIndex, 1);
-                appData.currentUserIndex = null;
-                saveAppData();
-                renderHomeScreen();
-            } else if (deleteMode === 'stamp') {
-                const state = getCurrentState();
-                if (state) {
-                    state.stamps = state.stamps.filter(s => s.index !== deleteIndex);
-                    saveAppData();
-                    renderCard();
-                }
+          if (deleteMode === 'user') {
+            appData.users.splice(deleteIndex, 1);
+            appData.currentUserIndex = null;
+            saveAppData();
+            renderHomeScreen();
+          } else if (deleteMode === 'stamp') {
+            const state = getCurrentState();
+            if (state) {
+              state.stamps = state.stamps.filter(s => s.index !== deleteIndex);
+              saveAppData();
+              renderCard();
             }
+          }
 
-            deleteModal.classList.remove('is-visible');
-            deleteIndex = null;
-            deleteMode = null;
+          deleteModal.classList.remove('is-visible');
+          deleteIndex = null;
+          deleteMode = null;
         });
 
         document.getElementById('cancel-stamp').addEventListener('click', () => {
-            stampModal.classList.remove('is-visible');
-            const state = getCurrentState();
-            if (state) state.stampingIndex = null;
+          stampModal.classList.remove('is-visible');
+          const state = getCurrentState();
+          if (state) state.stampingIndex = null;
         });
 
         document.getElementById('default-stamp-1').addEventListener('click', () => applyStamp(createStampSVG('star')));
         document.getElementById('default-stamp-2').addEventListener('click', () => applyStamp(createStampSVG('heart')));
         document.getElementById('default-stamp-3').addEventListener('click', () => applyStamp(createStampSVG('thumb')));
-    
+
         document.getElementById('image-upload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const state = getCurrentState();
-            if (!file || !state) {
-                e.target.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    const maxSize = 300;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxSize) {
-                            height = Math.round(height * (maxSize / width));
-                            width = maxSize;
-                        }
-                    } else {
-                        if (height > maxSize) {
-                            width = Math.round(width * (maxSize / height));
-                            height = maxSize;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-                    if (state.stockedStamps.length >= 3) {
-                        state.stockedStamps.shift();
-                    }
-                    state.stockedStamps.push(imageUrl);
-
-                    saveAppData();
-                    applyStamp(imageUrl);
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-
+          const file = e.target.files[0];
+          const state = getCurrentState();
+          if (!file || !state) {
             e.target.value = '';
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              const maxSize = 300;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > maxSize) {
+                  height = Math.round(height * (maxSize / width));
+                  width = maxSize;
+                }
+              } else {
+                if (height > maxSize) {
+                  width = Math.round(width * (maxSize / height));
+                  height = maxSize;
+                }
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+              if (state.stockedStamps.length >= 3) {
+                state.stockedStamps.shift();
+              }
+              state.stockedStamps.push(imageUrl);
+
+              saveAppData();
+              applyStamp(imageUrl);
+            };
+            img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+
+          e.target.value = '';
         });
 
         document.getElementById('close-celebration').addEventListener('click', () => {
-            celebrationScreen.classList.remove('is-visible');
+          celebrationScreen.classList.remove('is-visible');
         });
 
         loadAppData();
+
         if (appData.currentUserIndex !== null && appData.users[appData.currentUserIndex]) {
-            const state = getCurrentState();
-            if (state.isSetup || !state.name) {
-                renderSetup();
-            } else {
-                renderCard();
-            }
+          const state = getCurrentState();
+          if (state.isSetup || !state.name) renderSetup();
+          else renderCard();
         } else {
-            renderHomeScreen();
+          renderHomeScreen();
         }
-    }
+      }
 
-    init();
-  });
+      init();
+    });
   </script>
-
 </body>
 </html>
