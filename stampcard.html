@@ -562,6 +562,9 @@
 
           appData.users.forEach(user => {
             if (typeof user.cardBackground === 'undefined') user.cardBackground = '#fff9e6';
+            if (typeof user.cardWallpaper === 'undefined') {
+              user.cardWallpaper = '';
+            }
             if (typeof user.exchanges === 'undefined') user.exchanges = [];
             if (!Array.isArray(user.stockedStamps)) user.stockedStamps = [];
             if (typeof user.memo === 'undefined') user.memo = '';
@@ -589,6 +592,7 @@
           if (oldState.name || (oldState.stamps && oldState.stamps.length > 0)) {
             oldState.goal = oldState.goal || '';
             oldState.cardBackground = '#fff9e6';
+            oldState.cardWallpaper = '';
             oldState.exchanges = [];
             oldState.stockedStamps = oldState.stockedStamps || [];
             oldState.memo = '';
@@ -731,7 +735,12 @@
             </div>
 
             <div class="mb-6">
-              <p class="block text-gray-700 font-bold mb-2">カードの はいけい</p>
+              <p class="block text-gray-700 font-bold mb-2">
+    カードのかべがみ
+</p>
+<p class="text-xs text-gray-500 mb-3">
+    すきなデザインをえらんでね
+</p>
               <div id="background-selector" class="flex gap-3 justify-center"></div>
             </div>
 
@@ -792,27 +801,103 @@
       }
 
       function renderBackgroundSelector() {
-        const state = getCurrentState();
-        if (!state) return;
-        const selector = document.getElementById('background-selector');
-        if (!selector) return;
-        const backgrounds = [
-          { value: '#fff9e6', name: 'きいろ' },
-          { value: '#e0f2fe', name: 'みずいろ' },
-          { value: '#fce7f3', name: 'ぴんく' },
-          { value: '#f0fdf4', name: 'みどり' }
-        ];
-        selector.innerHTML = backgrounds.map(bg => {
-          const isSelected = state.cardBackground === bg.value;
-          return `
-            <div data-bg="${bg.value}" class="cursor-pointer text-center">
-              <div class="w-12 h-12 rounded-full border-4 ${isSelected ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-white'}"
-                style="background-color: ${bg.value};"></div>
-              <span class="text-xs font-semibold text-gray-600">${bg.name}</span>
+    const state = getCurrentState();
+    if (!state) return;
+
+    const selector = document.getElementById('background-selector');
+    if (!selector) return;
+
+    const wallpapers = [
+        {
+            value: '',
+            name: 'シンプル',
+            color: '#fff9e6'
+        },
+        {
+            value: 'wallpapers/star.png',
+            name: 'おほしさま'
+        },
+        {
+            value: 'wallpapers/sky.png',
+            name: 'そら'
+        },
+        {
+            value: 'wallpapers/heart.png',
+            name: 'ハート'
+        },
+        {
+            value: 'wallpapers/clover.png',
+            name: 'クローバー'
+        },
+        {
+            value: 'wallpapers/dinosaur.png',
+            name: 'きょうりゅう'
+        },
+        {
+            value: 'wallpapers/ocean.png',
+            name: 'うみ'
+        },
+        {
+            value: 'wallpapers/space.png',
+            name: 'うちゅう'
+        }
+    ];
+
+    selector.className = 'grid grid-cols-2 gap-3';
+
+    selector.innerHTML = wallpapers.map(wp => {
+
+        const isSelected =
+            (state.cardWallpaper || '') === wp.value;
+
+        const backgroundStyle = wp.value
+            ? `
+                background-image: url('${wp.value}');
+                background-size: cover;
+                background-position: center;
+              `
+            : `
+                background-color: ${wp.color};
+              `;
+
+        return `
+            <div
+                data-wallpaper="${wp.value}"
+                class="
+                    cursor-pointer
+                    rounded-xl
+                    overflow-hidden
+                    border-4
+                    transition
+                    ${
+                        isSelected
+                            ? 'border-yellow-500 ring-2 ring-yellow-300'
+                            : 'border-white'
+                    }
+                "
+            >
+
+                <div
+                    class="h-24 w-full"
+                    style="${backgroundStyle}">
+                </div>
+
+                <div class="
+                    text-center
+                    text-sm
+                    font-bold
+                    text-gray-700
+                    bg-white
+                    py-2
+                ">
+                    ${wp.name}
+                </div>
+
             </div>
-          `;
-        }).join('');
-      }
+        `;
+
+    }).join('');
+}
 
       function renderRewardSelector() {
         const state = getCurrentState();
@@ -848,7 +933,21 @@
         const commentHtml = (state.comment || '').replace(/\n/g, '<br>');
 
         app.innerHTML = `
-          <div id="capture-area" class="rounded-2xl p-4" style="background-color: ${state.cardBackground};">
+  <div id="capture-area"
+     class="rounded-2xl p-4"
+     style="
+        background-color: ${state.cardBackground || '#fff9e6'};
+        ${
+            state.cardWallpaper
+                ? `
+                    background-image: url('${state.cardWallpaper}');
+                    background-size: 100% 100%;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                  `
+                : ''
+        }
+     ">
             <div class="text-center pt-4 mb-4">
               <h1 class="text-2xl font-bold text-yellow-800">
                 ${state.name} がんばりカード　${cardNo}枚目 <span aria-hidden="true">🌟</span>
@@ -1041,6 +1140,7 @@
               stampingIndex: null,
               stockedStamps: [],
               cardBackground: '#fff9e6',
+              cardWallpaper: '',
               memo: '',
               comment: '',
               cardNumber: 1 // ★追加
@@ -1127,11 +1227,19 @@
         });
 
         document.getElementById('background-selector').addEventListener('click', (e) => {
-          const target = e.target.closest('div[data-bg]');
-          if (!target) return;
-          state.cardBackground = target.dataset.bg;
-          renderBackgroundSelector();
-        });
+
+    const target = e.target.closest('[data-wallpaper]');
+
+    if (!target) return;
+
+    state.cardWallpaper = target.dataset.wallpaper;
+
+if (state.cardWallpaper === '') {
+    state.cardBackground = '#fff9e6';
+}
+
+renderBackgroundSelector();
+});
 
         document.getElementById('create-card-btn').addEventListener('click', () => {
           if (!state.name) {
